@@ -24,14 +24,14 @@ from matplotlib import rcParams
 #rcParams['font.weight'] = 'light'
 rcParams['text.usetex'] = True
 
-rcParams['axes.labelsize'] = 58
-rcParams['xtick.labelsize'] = 58
-rcParams['ytick.labelsize'] = 58
+rcParams['axes.labelsize'] = 48
+rcParams['xtick.labelsize'] = 48
+rcParams['ytick.labelsize'] = 48
 #rcParams['legend.fontsize'] = 52
-rcParams['legend.fontsize'] = 37
+rcParams['legend.fontsize'] = 22
 #rcParams['legend.fontsize'] = 72 #for different Re
 size_title=30
-size_axes=58
+size_axes=48
 l_w_1=4.5
 l_w_2=6.5
 m_s=22
@@ -1106,7 +1106,7 @@ def several_times_and_flight(all_interval3, all_data3_3,
   #using new interpretation of b
   new_y_extrapolation_2=np.exp(c_fixed+(b_solved[m])*(x_plot-x_zero)-(1/(2*several_sigma_square_new[m])*(x_plot-x_zero)**2))
 
-  ax1.plot(x_plot,new_y_extrapolation_2 , color=color_set[6], label=r'Extrapol t$\,\approx\,$70 min ',  linestyle='--', linewidth=l_w_2)
+  #ax1.plot(x_plot,new_y_extrapolation_2 , color=color_set[6], label=r'Extrapol t$\,\approx\,$70 min ',  linestyle='--', linewidth=l_w_2)
   #ax1.plot(x_plot,new_y_extrapolation_2 , color=color_set[7],  linestyle='--', linewidth=l_w_2)
   
   #SECOND NEW EXTRAPOLATION
@@ -1116,7 +1116,7 @@ def several_times_and_flight(all_interval3, all_data3_3,
   #using new interpretation of b
   new_y_extrapolation_2=np.exp(c_fixed+(b_solved[m])*(x_plot-x_zero)-(1/(2*several_sigma_square_new[m])*(x_plot-x_zero)**2))
 
-  ax1.plot(x_plot,new_y_extrapolation_2 , color=color_set[7], label=r'Extrapol t$\,\approx\,$400 min ',  linestyle='--', linewidth=l_w_2)
+  #ax1.plot(x_plot,new_y_extrapolation_2 , color=color_set[7], label=r'Extrapol t$\,\approx\,$400 min ',  linestyle='--', linewidth=l_w_2)
   #ax1.plot(x_plot,new_y_extrapolation_2 , color=color_set[7],  linestyle='--', linewidth=l_w_2)
   
 
@@ -1176,8 +1176,8 @@ def several_times_and_flight(all_interval3, all_data3_3,
 
 
    
-#  ax12 = ax1.twiny()
-#  ax12.set_xlabel(r"Radius [$\mu m$]", fontsize=size_axes)
+  ax12 = ax1.twiny()
+  ax12.set_xlabel(r"Radius [$\mu m$]", fontsize=size_axes)
   if (dycoms==0):
     tick_locs = [0.5,1,1.5,2.0,2.5,3.0,3.5,4.0]
     tick_lbls = [8.2,10.3,11.8,13,14,14.9,15.7,16.4]
@@ -1185,9 +1185,9 @@ def several_times_and_flight(all_interval3, all_data3_3,
     tick_locs = [0.5,1,1.5,2.0,2.5,3.0,3.5,4.0]
     tick_lbls = [8.9,11,12.8,14,15.2,16.1,17,17.7]
     
-#  ax12.set_xticks(tick_locs)
-#  ax12.set_xticklabels(tick_lbls)
-#  ax12.set_xlim(0.1,3)
+  ax12.set_xticks(tick_locs)
+  ax12.set_xticklabels(tick_lbls)
+  ax12.set_xlim(0.1,4)
   ax1.legend(loc=0, frameon=False)
   
   plt.legend(loc=1, frameon=False)  
@@ -1221,11 +1221,11 @@ def several_times_and_flight(all_interval3, all_data3_3,
   ########################################################################
   #plot sigma_square with time
   ########################################################################
-  fig, ax4 = ppl.subplots()
-
-  plt.title('fit parameter sigma square')
-  ax4.plot(steps_time,sigma_square_new, color=color_set[1],marker='.',linestyle='None',markersize=m_s+9 )
-  ax4.plot(time_extrapol,sigma_square_new_fit , color=color_set[7],linestyle='--', linewidth=l_w_2)
+#  fig, ax4 = ppl.subplots()
+#
+#  plt.title('fit parameter sigma square')
+#  ax4.plot(steps_time,sigma_square_new, color=color_set[1],marker='.',linestyle='None',markersize=m_s+9 )
+#  ax4.plot(time_extrapol,sigma_square_new_fit , color=color_set[7],linestyle='--', linewidth=l_w_2)
 
 #
 #

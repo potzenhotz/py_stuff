@@ -47,13 +47,18 @@ if (dycoms==0):
   #data_path_1 = '/home/zmaw/u300202/python/master/data_ar_re800_rescale/'  
   #data_path_2 = '/home/zmaw/u300202/python/master/data_ar_re400_stretch_rescale/'  
   #data_path_3 = '/home/zmaw/u300202/python/master/data_ar_re200_stretch/'  
-  data_path_1 = '/home/zmaw/u300202/python/master/general/data_ar_re800_general/'  
-  data_path_2 = '/home/zmaw/u300202/python/master/general/data_ar_re400_stretch_general/'  
+  #data_path_1 = '/home/zmaw/u300202/python/master/general/data_ar_re800_general/'  
+  data_path_1 = 'data_ar_re800_general/'  
+  #data_path_2 = '/home/zmaw/u300202/python/master/general/data_ar_re400_stretch_general/'  
+  data_path_2 = 'data_ar_re400_stretch_general/'  
   if (stratification==0):
-    data_path_3 = '/home/zmaw/u300202/python/master/general/data_ar_re200_stretch_general/'  
+    data_path_3 = 'data_ar_re200_stretch_general/'  
+    #data_path_3 = '/home/zmaw/u300202/python/master/general/data_ar_re200_stretch_general/'  
   else:
-    data_path_3 = '/home/zmaw/u300202/python/master/general/data_ar_re200_stretch_general_strat/'  
-  data_path_4= '/home/zmaw/u300202/python/master/general/flight_data/'
+    data_path_3 = 'data_ar_re200_stretch_general_strat/'  
+    #data_path_3 = '/home/zmaw/u300202/python/master/general/data_ar_re200_stretch_general_strat/'  
+  data_path_4= 'flight_data/'
+  #data_path_4= '/home/zmaw/u300202/python/master/general/flight_data/'
 
 else:
 #  data_path_1 = '/home/zmaw/u300202/python/master/data_dy_re800/'  
