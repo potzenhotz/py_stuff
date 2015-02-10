@@ -922,6 +922,9 @@ def several_times_and_flight(all_interval3, all_data3_3,
     if (k==fit_start):
       #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[1],linewidth=l_w_1)
       ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[1],linewidth=l_w_1, label='Simulation ' + label_name)
+    elif (k==24):
+      #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[1],linewidth=l_w_1)
+      ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[1],linewidth=l_w_1, label='Simulation ' + label_name)
     elif (k==35):
       #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[1],linewidth=l_w_1)
       ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[1],linewidth=l_w_1, label='Simulation ' + label_name)
