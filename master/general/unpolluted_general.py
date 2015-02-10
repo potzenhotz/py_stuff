@@ -28,7 +28,7 @@ rcParams['axes.labelsize'] = 48
 rcParams['xtick.labelsize'] = 48
 rcParams['ytick.labelsize'] = 48
 #rcParams['legend.fontsize'] = 52
-rcParams['legend.fontsize'] = 22
+rcParams['legend.fontsize'] = 35
 #rcParams['legend.fontsize'] = 72 #for different Re
 size_title=30
 size_axes=48
@@ -963,10 +963,11 @@ def several_times_and_flight(all_interval3, all_data3_3,
     x = np.linspace(1.75,mean+6,1000) #alberto
     y=np.exp( (z[2]+z[1]**2/(4*-z[0]))-(((x-mean)**2)/(2*sigma_square)) )
 
-    if (k==fit_start):
-      ax1.plot(x[0:len(x)],y[0:len(y)] , color=color_set[1], linestyle='--', linewidth=l_w_2)
-    elif (k==35):
-      ax1.plot(x[0:len(x)],y[0:len(y)] , color=color_set[1], linestyle='--', linewidth=l_w_2)
+    #PLOT BLUE FITS AS BEFORE
+    #if (k==fit_start):
+    #  ax1.plot(x[0:len(x)],y[0:len(y)] , color=color_set[1], linestyle='--', linewidth=l_w_2)
+    #elif (k==35):
+    #  ax1.plot(x[0:len(x)],y[0:len(y)] , color=color_set[1], linestyle='--', linewidth=l_w_2)
     c=c+2 #for the color code
 
 
