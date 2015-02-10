@@ -890,7 +890,9 @@ def several_times_and_flight(all_interval3, all_data3_3,
   #ax1.plot(interval_flight,data_flight, color=color_set[9],marker='.',linestyle='None',markersize=m_s+9 , label='Flight measurements')
   #alberto
   #ax1.plot(interval_flight,data_flight, color=color_set[9],marker='.',linestyle='None',markersize=m_s+9 )
-  ax1.plot(interval_flight,data_flight, color=color_set[9],marker='.',linestyle='None',markersize=m_s+9 , label='Flight measurements')
+
+
+  ##ax1.plot(interval_flight,data_flight, color=color_set[9],marker='.',linestyle='None',markersize=m_s+9 , label='Flight measurements')
 
   ########################################################################
   #Plot the data+fit
@@ -1153,8 +1155,8 @@ def several_times_and_flight(all_interval3, all_data3_3,
 
 
   #GRID LINES
-  axes = plt.gca()
-  axes.grid(True)
+  #axes = plt.gca()
+  #axes.grid(True)
 
   ax1.set_yscale('symlog')
   #ax1.set_xlabel(r'$M/M_r$', fontsize=size_axes)#,fontdict=font) #das r hier markiert, dass jetz latex code kommt
@@ -1162,32 +1164,33 @@ def several_times_and_flight(all_interval3, all_data3_3,
   #ax1.set_xlabel('Droplet mass', fontsize=size_axes)#,fontdict=font) #das r hier markiert, dass jetz latex code kommt
   ax1.set_xlabel(r'$M/M_r$', fontsize=size_axes)#,fontdict=font) #das r hier markiert, dass jetz latex code kommt
   ax1.set_ylabel('Amount of cloud droplets', fontsize=size_axes)#,fontdict=font)
-  ax1.set_xlim(0.8,4)#alberto
-  ax1.set_xlim(0.1,4)#alberto
+  ax1.set_xlim(0.1,3)#alberto
   ax1.set_ylim([10**2,10**8])
   #ax1.set_ylim([0,10**8])
   
   #Hide the right and top spines
-  #ax1.spines['right'].set_visible(False)
-  #ax1.spines['top'].set_visible(False)
+  ax1.spines['right'].set_visible(False)
+  ax1.spines['top'].set_visible(False)
   #Only show ticks on the left and bottom spines
-  #ax1.yaxis.set_ticks_position('left')
-  #ax1.xaxis.set_ticks_position('bottom')
+  ax1.yaxis.set_ticks_position('left')
+  ax1.xaxis.set_ticks_position('bottom')
 
 
-   
-  ax12 = ax1.twiny()
-  ax12.set_xlabel(r"Radius [$\mu m$]", fontsize=size_axes)
-  if (dycoms==0):
-    tick_locs = [0.5,1,1.5,2.0,2.5,3.0,3.5,4.0]
-    tick_lbls = [8.2,10.3,11.8,13,14,14.9,15.7,16.4]
-  else:
-    tick_locs = [0.5,1,1.5,2.0,2.5,3.0,3.5,4.0]
-    tick_lbls = [8.9,11,12.8,14,15.2,16.1,17,17.7]
-    
-  ax12.set_xticks(tick_locs)
-  ax12.set_xticklabels(tick_lbls)
-  ax12.set_xlim(0.1,4)
+  ##################################
+  #RADIUS FOR TOP AXIS
+  ##################################   
+#  ax12 = ax1.twiny()
+#  ax12.set_xlabel(r"Radius [$\mu m$]", fontsize=size_axes)
+#  if (dycoms==0):
+#    tick_locs = [0.5,1,1.5,2.0,2.5,3.0,3.5,4.0]
+#    tick_lbls = [8.2,10.3,11.8,13,14,14.9,15.7,16.4]
+#  else:
+#    tick_locs = [0.5,1,1.5,2.0,2.5,3.0,3.5,4.0]
+#    tick_lbls = [8.9,11,12.8,14,15.2,16.1,17,17.7]
+#    
+#  ax12.set_xticks(tick_locs)
+#  ax12.set_xticklabels(tick_lbls)
+#  ax12.set_xlim(0.1,4)
   ax1.legend(loc=0, frameon=False)
   
   plt.legend(loc=1, frameon=False)  
