@@ -28,19 +28,19 @@ from matplotlib import rcParams
 ########################################################################
 
 
-dycoms=0
-compare=1
-extrapolation=0
-extrapolation_2=0
-fitting=0
-flight=0
-only_last=0
+dycoms=0 #0
+compare=0 #0
+extrapolation=0 #0
+extrapolation_2=0 #0
+fitting=0 #0
+flight=0 #0
+only_last=0 #0
 s_point=32 #start point of fitting normal 27 for alberto 35
-several_times=0
-several_times_and_flight=1
-several_fits=0
+several_times=0 #0
+several_times_and_flight=1 #1
+several_fits=0 #0
 
-stratification=1
+stratification=1  #1
 
 if (dycoms==0):
   #data_path_1 = '/home/zmaw/u300202/python/master/data_ar_re800/'  
@@ -94,7 +94,7 @@ tstart_3  = 100
 if (stratification==0):
   tend_3    = 3600
 else:
-  tend_3    = 10000
+  tend_3    = 18900
 tstep_3   = 100
 
 nbins   = 100
@@ -142,7 +142,7 @@ plot_type=0
 
 time_data_1=np.zeros(100)
 time_data_2=np.zeros(100)
-time_data_3=np.zeros(100)
+time_data_3=np.zeros(300)
 time_data_1 = unpolluted_general.read_timedata(data_path_1, time_data_1)
 time_data_2 = unpolluted_general.read_timedata(data_path_2, time_data_2)
 if (dycoms==0):

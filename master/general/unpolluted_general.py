@@ -308,12 +308,19 @@ def plot_data_compare_2(interval1,data1_1, data1_2, data1_3,
       plt.xlim(0.9,2.6)
     else:
       plt.xticks([0.1,0.5,1,1.5,2.0,2.5,3.0,3.5,4.0]) 
-      plt.xlim(0.1,2.6)
+      plt.xlim(0.1,2.2)
     plt.ylim([10,10**8])
     #plt.ylim([10**3,10**9])
-    plt.ylim([10**3,10**8])
     #plt.xlim([0.9,3.0])
     plt.legend(loc=1, frameon=False)  
+    
+
+    #Hide the right and top spines
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    #Only show ticks on the left and bottom spines
+    ax.yaxis.set_ticks_position('left')
+    ax.xaxis.set_ticks_position('bottom')
   
     plt.show()
 
@@ -881,7 +888,6 @@ def several_times_and_flight(all_interval3, all_data3_3,
   for i in np.arange(time_length):
     sum_all_data3_3[i]=np.sum(all_data3_3[:,i])
     sum_all_data3_3[i]=sum_all_data3_3[i]-all_data3_3[0,i]
-
   ########################################################################
   #Plot the flight data
   ########################################################################
@@ -891,13 +897,14 @@ def several_times_and_flight(all_interval3, all_data3_3,
   #alberto
   #ax1.plot(interval_flight,data_flight, color=color_set[9],marker='.',linestyle='None',markersize=m_s+9 )
 
+  # actual flight thing now
+  ax1.plot(interval_flight,data_flight,zorder=10, color=color_set[9],marker='.',linestyle='None',markersize=m_s+9 , label='Flight data')
 
-  ##ax1.plot(interval_flight,data_flight, color=color_set[9],marker='.',linestyle='None',markersize=m_s+9 , label='Flight measurements')
 
   ########################################################################
   #Plot the data+fit
   ########################################################################
-  print 'AHAHAHA', all_data3_3.shape
+  print 'AHAHAHA', all_data3_3.shape, all_interval3.shape , time_data.shape
   time_real_data=np.zeros(len(time_data))
   for i in np.arange(len(time_data)): 
     time_real_data[i]=round(time_data[i]*t_real/60,2)
@@ -905,7 +912,7 @@ def several_times_and_flight(all_interval3, all_data3_3,
   #steps=np.array([12,23, 35])
   fit_start=15
   #steps= np.arange(fit_start,36)
-  steps= np.arange(fit_start,100)
+  steps= np.arange(fit_start,189)
   print 'here steps', steps
   c=1
   l=0
@@ -913,30 +920,65 @@ def several_times_and_flight(all_interval3, all_data3_3,
   a_new = np.zeros(len(steps)) 
   N_integrate = np.zeros(len(steps)) 
   sigma_square_new = np.zeros(len(steps)) 
-  for k in steps:
+
+  t_0 = 55
+  l_0 = 1.065
+  G = 0.04/20
+  plot_t = [fit_start,24,35,55,79,99,144,166,188]
+  l_c = [1,1,1,3,5,9,11,0,2]
+  j=0
+  for k in plot_t:
     time_real_data[k]=round(time_real_data[k],0)
+    #label_name='Simulation t=' + str(int(time_real_data[k])) + ' min'
     label_name='t=' + str(int(time_real_data[k])) + ' min'
-    #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[c],linewidth=l_w_1, label='Simulation ' + label_name)
-    #alberto
-    #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[c],linewidth=l_w_1)
-    if (k==fit_start):
-      #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[1],linewidth=l_w_1)
-      ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[1],linewidth=l_w_1, label='Simulation ' + label_name)
-    elif (k==24):
-      #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[1],linewidth=l_w_1)
-      ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[1],linewidth=l_w_1, label='Simulation ' + label_name)
-    elif (k==35):
-      #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[1],linewidth=l_w_1)
-      ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[1],linewidth=l_w_1, label='Simulation ' + label_name)
-    elif (k==55):
-      #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[3],linewidth=l_w_1)
-      ax1.plot(all_interval3[:,k]/1.065,all_data3_3[:,k],color=color_set[3],linewidth=l_w_1, label='Simulation ' + label_name)
-    elif (k==79):
-      #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[5],linewidth=l_w_1)
-      ax1.plot(all_interval3[:,k]/1.08,all_data3_3[:,k],color=color_set[5],linewidth=l_w_1, label='Simulation ' + label_name)
-    elif (k==99):
-      #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[9],linewidth=l_w_1)
-      ax1.plot(all_interval3[:,k]/1.108,all_data3_3[:,k],color=color_set[9],linewidth=l_w_1, label='Simulation ' + label_name)
+    if (k < t_0 ):
+      scale=1.0
+    else:
+      scale= l_0+G*(k-t_0)
+    print 'scale', scale
+    #scale=1
+    ax1.plot(all_interval3[:,k]/scale,all_data3_3[:,k],color=color_set[l_c[j]],linewidth=l_w_1, label=label_name)
+    j=j+1
+#    if (k==fit_start):
+#      #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[1],linewidth=l_w_1)
+#      ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[1],linewidth=l_w_1, label='Simulation ' + label_name)
+#    elif (k==24):
+#      #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[1],linewidth=l_w_1)
+#      ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[1],linewidth=l_w_1, label='Simulation ' + label_name)
+#    elif (k==35):
+#      #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[1],linewidth=l_w_1)
+#      ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[1],linewidth=l_w_1, label='Simulation ' + label_name)
+#    elif (k==55):
+#      scale = l_0+G*(k-t_0)
+#      #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[3],linewidth=l_w_1)
+#      ax1.plot(all_interval3[:,k]/scale,all_data3_3[:,k],color=color_set[3],linewidth=l_w_1, label='Simulation ' + label_name)
+#      #old value 1.065
+#    elif (k==79):
+#      scale = l_0+G*(k-t_0)
+#      #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[5],linewidth=l_w_1)
+#      ax1.plot(all_interval3[:,k]/scale,all_data3_3[:,k],color=color_set[5],linewidth=l_w_1, label='Simulation ' + label_name)
+#      #old value 1.08
+#    elif (k==99):
+#      scale = l_0+G*(k-t_0)
+#      #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[9],linewidth=l_w_1)
+#      ax1.plot(all_interval3[:,k]/scale,all_data3_3[:,k],color=color_set[9],linewidth=l_w_1, label='Simulation ' + label_name)
+#      #old value 1.104
+#    elif (k==144):
+#      scale=l_0+G*(k-t_0)
+#      #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[9],linewidth=l_w_1)
+#      ax1.plot(all_interval3[:,k]/scale,all_data3_3[:,k],color=color_set[11],linewidth=l_w_1, label='Simulation ' + label_name)
+#      #old value 1.138
+#    elif (k==166):
+#      scale= l_0+G*(k-t_0)
+#      #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[9],linewidth=l_w_1)
+#      ax1.plot(all_interval3[:,k]/scale,all_data3_3[:,k],color=color_set[0],linewidth=l_w_1, label='Simulation ' + label_name)
+#      #old value 1.153
+#    elif (k==188):
+#      scale= l_0+G*(k-t_0)
+#      #ax1.plot(all_interval3[:,k],all_data3_3[:,k],color=color_set[9],linewidth=l_w_1)
+#      ax1.plot(all_interval3[:,k]/scale,all_data3_3[:,k],color=color_set[2],linewidth=l_w_1, label='Simulation ' + label_name)
+ 
+  for k in steps:
     log_data= np.zeros(100)  
     log_interval= np.zeros(100) 
     for i in np.arange(len(all_data3_3[:,k])):
@@ -992,7 +1034,7 @@ def several_times_and_flight(all_interval3, all_data3_3,
     
     #NEW Y WITH x=x-x_zero
     y_new=np.exp( (c_fixed+fitpars[1]**2/(4*-fitpars[0]))-((((x-x_zero)-mean_new)**2)/(2*sigma_square_calc)) )
-    print 'CURVE FIT fitpars', fitpars
+    #print 'CURVE FIT fitpars', fitpars
     
     #GET/CALCULATE FIT PARAMETERS
     a_new[l]=fitpars[0]
@@ -1170,7 +1212,6 @@ def several_times_and_flight(all_interval3, all_data3_3,
   ax1.set_ylabel('Amount of cloud droplets', fontsize=size_axes)#,fontdict=font)
   ax1.set_xlim(0.1,3)#alberto
   ax1.set_ylim([10**2,10**8])
-  #ax1.set_ylim([0,10**8])
   
   #Hide the right and top spines
   ax1.spines['right'].set_visible(False)
@@ -1195,9 +1236,20 @@ def several_times_and_flight(all_interval3, all_data3_3,
 #  ax12.set_xticks(tick_locs)
 #  ax12.set_xticklabels(tick_lbls)
 #  ax12.set_xlim(0.1,4)
-  ax1.legend(loc=0, frameon=False)
+
+  # CHANGE POSITON OF A LEGEND
+  #handles, labels = ax1.get_legend_handles_labels()
+  #dummy_legend_h=handles[0]
+  #dummy_legend_l=labels[0]
+  #handles[0] = handles[len(handles)-1]
+  #labels[0] = labels[len(labels)-1]
+  #handles[len(handles)-1] = dummy_legend_h
+  #labels[len(labels)-1] = dummy_legend_l
+  #ax1.legend(handles, labels,loc=1, frameon=False, numpoints=1)
   
-  plt.legend(loc=1, frameon=False)  
+
+  ax1.legend(loc=1, frameon=False, numpoints=1)
+  
 
 
 #  ########################################################################
