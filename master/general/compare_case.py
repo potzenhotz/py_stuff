@@ -29,7 +29,7 @@ from matplotlib import rcParams
 
 
 dycoms=0 #0
-compare=0 #0
+compare=0 #0 #and just here 1
 extrapolation=0 #0
 extrapolation_2=0 #0
 fitting=0 #0
@@ -249,7 +249,9 @@ if (plot_type == 0):
   if (dycoms==0):
     data_name=data_path_4 + 'data.txt' 
     interval_4, flight_data = np.loadtxt(data_name, unpack=True) # read file into data:
-  
+    data_name=data_path_4 + 'data_4s.txt' 
+    interval_4_2, flight_data_2 , flight_err_2= np.loadtxt(data_name, unpack=True) # read file into data:
+
   names_1 = {}
   names_1[1]='Eulerian Re800'
   names_1[2]='Lagrange Re800'
@@ -285,7 +287,8 @@ if (plot_type == 0):
        unpolluted_general.several_times_and_flight(interval_3,l_nodiff_3,
                                      names_3,p_title_3,time_real_1, time_real_2, time_real_3,
                                      delta_s,t_real,time_data_3, dycoms,fitting, s_point, 
-                                      interval_4,flight_data, l_nodiff_3[:,plt_ts_3], interval_3[:,plt_ts_3])
+                                      interval_4,flight_data,interval_4_2, flight_data_2,flight_err_2,
+                                       l_nodiff_3[:,plt_ts_3], interval_3[:,plt_ts_3])
     else: 
   #  unpolluted_general.plot_fitting(interval_3[:,plt_ts_3], eulerian_3[:,plt_ts_3], l_diff_3[:,plt_ts_3], l_nodiff_3[:,plt_ts_3])
   
