@@ -9,7 +9,7 @@ from matplotlib import rcParams
 ########################################################################
 #Which plot should be produced
 ########################################################################
-compare=1 # =1 if u want to compare different Re numbers
+compare=0 # =1 if u want to compare different Re numbers
 
 ########################################################################
 #Setup data path
@@ -151,8 +151,7 @@ if (compare==1):
                               names_1, names_2,names_3)
 else:
   functions_for_plot.several_times_and_flight(interval_3,l_nodiff_3,
-                            names_3,p_title_3,time_real_1, time_real_2, time_real_3,
-                            delta_s,t_real,time_data_3,  
+                            t_real,time_data_3,  
                             interval_4,flight_data,interval_4_2, flight_data_2,flight_err_2,
                             l_nodiff_3[:,plt_ts_3], interval_3[:,plt_ts_3])
 
