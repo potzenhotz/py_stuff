@@ -9,7 +9,7 @@ from matplotlib import rcParams
 ########################################################################
 #Which plot should be produced
 ########################################################################
-compare=0 # =1 if u want to compare different Re numbers
+compare=1 # =1 if u want to compare different Re numbers
 
 ########################################################################
 #Setup data path
@@ -53,12 +53,6 @@ plt_ts_1=(plt_ts_1-tstart_1)/tstep_1
 plt_ts_2=(plt_ts_2-tstart_2)/tstep_2 
 plt_ts_3=(plt_ts_3-tstart_3)/tstep_3 
 
-print plt_ts_1, plt_ts_2 
-
-p_title_part_1  = 'VERDI'
-p_title_part_t  = ' - Time: '
-
-
 
 time_data_1=np.zeros(100)
 time_data_2=np.zeros(100)
@@ -94,6 +88,9 @@ delta_s=(Ri*(D+chi_s))/(C_2*(1-chi_s))
 print 'verdi delta_s', delta_s
 
 
+########################################################################
+#Calculate real time
+########################################################################
 time_real_1=np.zeros(len(time_data_1))
 for i in np.arange(len(time_data_1)):
   time_real_1[i]=round(time_data_1[i]*t_real/60,2)
@@ -104,19 +101,10 @@ time_real_3=np.zeros(len(time_data_3))
 for i in np.arange(len(time_data_3)):
   time_real_3[i]=round(time_data_3[i]*t_real/60,2)
 
-time_buffer_3=round(time_data_3[plt_ts_3]*t_real/60,2)
-p_title_3     = p_title_part_1+p_title_part_t+str(time_buffer_3)+' [min]'
-print 'real time t3',p_title_3
-
-print 'time data',time_data_1[plt_ts_1], time_data_2[plt_ts_2]
-p_title_1     = p_title_part_1+p_title_part_t+str(time_data_1[plt_ts_1]*t_real/60)
-p_title_2     = p_title_part_1+p_title_part_t+str(time_data_2[plt_ts_2]*t_real/60)
-print 'real time t1 t2', p_title_1, p_title_2
-
 
 
 ########################################################################
-#Start plotting 
+#Read data
 ########################################################################
 [interval_1, eulerian_1, l_diff_1, l_nodiff_1] = functions_for_plot.read_data(data_path_1, tstart_1, tend_1, tstep_1, nbins)
 [interval_2, eulerian_2, l_diff_2, l_nodiff_2] = functions_for_plot.read_data(data_path_2, tstart_2, tend_2, tstep_2, nbins)
@@ -130,6 +118,9 @@ interval_4, flight_data = np.loadtxt(data_name, unpack=True) # read file into da
 data_name=data_path_4 + 'data_4s.txt' 
 interval_4_2, flight_data_2 , flight_err_2= np.loadtxt(data_name, unpack=True) # read file into data:
 
+########################################################################
+#Names for plotting
+########################################################################
 names_1 = {}
 names_1[1]='Eulerian Re800'
 names_1[2]='Lagrange Re800'
@@ -144,6 +135,9 @@ names_3[2]='Lagrange Re=200'
 names_3[3]=r'$Re_0 200$'
 
 
+########################################################################
+#Start plotting 
+########################################################################
 if (compare==1):
   functions_for_plot.plot_data_compare(interval_1[:,plt_ts_1], eulerian_1[:,plt_ts_1], l_diff_1[:,plt_ts_1], l_nodiff_1[:,plt_ts_1],
                               interval_2[:,plt_ts_2], eulerian_2[:,plt_ts_2], l_diff_2[:,plt_ts_2], l_nodiff_2[:,plt_ts_2],

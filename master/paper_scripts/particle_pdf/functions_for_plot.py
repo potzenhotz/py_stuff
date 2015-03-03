@@ -2,12 +2,6 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy
-import scipy.optimize as so
-import scipy.stats as ss
-import os
-import math
-from pylab import *                  
 import prettyplotlib as ppl
 from prettyplotlib import brewer2mpl
 from matplotlib import rcParams
