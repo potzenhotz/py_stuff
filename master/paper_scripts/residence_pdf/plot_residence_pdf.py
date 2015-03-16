@@ -156,6 +156,15 @@ def RunningMean(seq,N,M):
         means.append(np.mean(d))     # mean for current window
     return means  
 
+def movingaverage(values,window):
+    weigths = np.repeat(1.0, window)/window
+    #including valid will REQUIRE there to be enough datapoints.
+    #for example, if you take out valid, it will start @ point one,
+    #not having any prior points, so itll be 1+0+0 = 1 /3 = .3333
+    smas = np.convolve(values, weigths, 'valid')
+    return smas # as a numpy array
+
+print  np.repeat(1.0, 20)/20
 
 ########################################################################
 #Load data
@@ -261,30 +270,34 @@ time_steps=interval[1,1]-interval[0,1]
 ########################################################################
 diff_residence_lambda = np.zeros((nbins-1,ntimes))
 diff2_residence_lambda = np.zeros((nbins-1,ntimes))
-smoothed = np.zeros((nbins,ntimes))
 
 x = interval[1:nbins,88]/integral_time
 for i in range(0,ntimes): 
-  smoothed[:,i] = savitzky_golay(residence_lambda[:,i],51,3)
   y = np.log(residence_lambda[1:nbins,i])
-  #y = residence_lambda[1:nbins,i]
-  y_2 = savitzky_golay(y,81,3)
-  #y_2 = RunningMean(y,len(y),30)  
+  window_sg=21
+  y_2 = savitzky_golay(y,window_sg,1)
 
   for j in range(0,nbins-2): 
     diff2_residence_lambda[j,i] = y_2[j+1] -y_2[j]
-    #diff2_residence_lambda[j,i] = np.log(y_2[j+1]) -np.log(y_2[j])
 
-for i in range(0,ntimes): 
-  for j in range(0,nbins-1): 
-    diff_residence_lambda[j,i] = np.log(scale_residence_lambda[j+1,i]) - np.log(scale_residence_lambda[j,i])
-    #diff_residence_lambda[j,i] = np.log(residence_lambda[j+1,i]) - np.log(residence_lambda[j,i])
+#Test with only running mean
+#less good than svityzky_golay
+#window_smoth=30
+#smoothed = np.zeros((nbins-window_smoth,ntimes))
+#for i in range(0,ntimes): 
+##  smoothed_dummy = movingaverage(np.log(residence_lambda[:,i]),window_smoth)
+##  for j in range(0,nbins-window_smoth-1): 
+##    smoothed[j,i] = smoothed_dummy[j+1] - smoothed_dummy[j]
+#  for j in range(0,nbins-1): 
+#    #diff_residence_lambda[j,i] = np.log(scale_residence_lambda[j+1,i]) - np.log(scale_residence_lambda[j,i])
+#    diff_residence_lambda[j,i] = np.log(residence_lambda[j+1,i]) - np.log(residence_lambda[j,i])
+#  smoothed[:,i] = movingaverage(diff_residence_lambda[:,i],window_smoth)
+
 
 ########################################################################
 #Plot data
 ########################################################################
 fig, ax = plt.subplots()
-#fig, ax = ppl.subplots() #not sure anymore why ppl should be better
 color_set = brewer2mpl.get_map('paired', 'qualitative', 12).mpl_colors
 color_set_2 = brewer2mpl.get_map('PuBu', 'sequential', 9).mpl_colors
 color_set_3 = brewer2mpl.get_map('Dark2', 'qualitative', 8).mpl_colors
@@ -323,7 +336,7 @@ ax.spines['top'].set_visible(False)
 ax.yaxis.set_ticks_position('left')
 ax.xaxis.set_ticks_position('bottom')
 
-#Plot horizontal and vertical line with
+#Plot horizontal and vertical line:
 #ax.plot((x1,x2),(y1,y2))
 #ax.plot((0,1),(0.1,0.1), linewidth=l_w_1, color=color_set_4[2], zorder=1)
 #ax.plot((0,.75),(0.15,0.15), linewidth=l_w_1, color=color_set_4[2], zorder=10)
@@ -333,6 +346,7 @@ ax.xaxis.set_ticks_position('bottom')
 #ax.plot((.1,.1),(0.00001,0.75), linewidth=l_w_1, color=color_set_4[2], zorder=10)
 #ax.plot((0,2.5),(0.001,0.001), linewidth=l_w_1, color=color_set_4[2], zorder=1)
 #ax.plot((2.5,2.5),(0.00001,0.001), linewidth=l_w_1, color=color_set_4[2], zorder=1)
+
 ########################################################################
 #Plot derivative
 ########################################################################
@@ -345,12 +359,12 @@ j=0
 for i  in list:
   label_name='t=' + str(int(time_real_data[i+t_inter-1])) + ' min'
   #ax2.plot(interval[0:nbins-1,44]/integral_time, diff_residence_lambda[:,i]/(time_steps/integral_time),color=color_set_3[l_c[j]],marker='.',linestyle='None',markersize=l_w_2)
-  ax2.plot(interval[0:nbins-1,88]/integral_time, diff2_residence_lambda[:,i]/(time_steps/integral_time),color=color_set_3[l_c[j]],marker='.',linestyle='None',markersize=l_w_2)
+  ax2.plot(interval[(window_sg-1)/2:500+(window_sg-1)/2,88]/integral_time, diff2_residence_lambda[0:500,i]/(time_steps/integral_time),color=color_set_3[l_c[j]],marker='.',linestyle='None',markersize=l_w_2)
   j=j+1
 
 
 
-plt.xlim(0,4)
+plt.xlim(0,5)
 plt.ylim(-5,2.5)
 #plt.ylim(-5,0.5)
 ax2.set_ylabel(r'$d(log(p))/dt$', fontsize=size_axes)#,fontdict=font) #das r hier markiert, dass jetz latex code kommt
@@ -363,10 +377,11 @@ ax2.spines['top'].set_visible(False)
 ax2.yaxis.set_ticks_position('left')
 ax2.xaxis.set_ticks_position('bottom')
 
-#Plot horizontal and vertical line with
+#Plot horizontal and vertical line:
 #ax.plot((x1,x2),(y1,y2))
 #ax2.plot((0.75,0.75),(1,4), linewidth=l_w_1, color=color_set_4[2], zorder=1)
 #ax2.plot((2.5,2.5),(1,2), linewidth=l_w_1, color=color_set_4[2], zorder=1)
+
 ########################################################################
 #Plot with second scaling
 ########################################################################
@@ -389,6 +404,7 @@ ax3.set_yscale('log')
 
 ax3.set_xlabel(r'$t/t^*$', fontsize=size_axes)#,fontdict=font) #das r hier markiert, dass jetz latex code kommt
 ax3.set_ylabel(r'Amount of cloud droplets', fontsize=size_axes)#,fontdict=font) #das r hier markiert, dass jetz latex code kommt
+
 #Hide the right and top spines
 ax3.spines['right'].set_visible(False)
 ax3.spines['top'].set_visible(False)
@@ -399,5 +415,5 @@ ax3.xaxis.set_ticks_position('bottom')
 ########################################################################
 #Show all plots
 ########################################################################
-plt.show()
+#plt.show()
 

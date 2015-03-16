@@ -9,7 +9,7 @@ from matplotlib import rcParams
 ########################################################################
 #Which plot should be produced
 ########################################################################
-compare=1 # =1 if u want to compare different Re numbers
+compare=0 # =1 if u want to compare different Re numbers
 
 ########################################################################
 #Setup data path

@@ -170,8 +170,10 @@ def several_times_and_flight(all_interval3, all_data3_3,
   t_0 = 0 # timestep was before 55
   G = 0.09/20 #cooling rate from tkstat
   plot_t = [59,82,107,133,159,186] #"timesteps" we want to plot
+  #plot_t = [186] # only last step 
   t_sim=time_data[plot_t[:]] #simulation time-step from time_data
   l_c = [0,1,2,3,4,5] # for colors of brewer color scale
+  #l_c = [5] # red color
   j=0 #counter for colors
   for k in plot_t:
     time_real_data[k]=round(time_real_data[k],0)
