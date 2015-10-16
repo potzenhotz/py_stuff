@@ -2,15 +2,20 @@
 
 import numpy as np
 from math import sqrt; from itertools import count, islice
+import progressbar 
+import time
+progress = progressbar.ProgressBar()
 
 def isPrime(n):
     if n < 2: return False
     return all(n%i for i in islice(count(2), int(sqrt(n)-1)))
 
-print isPrime(4)
 var=600851475143
-var=600851475
-for i in np.arange(var)+1:
+#print type(var)
+#for i in np.arange(var)+1:
+for i in progress(xrange(1,var)):
   if (var % i == 0 ):
-#    if (isPrime(i) == True):
-    print i
+    #print i
+    if (isPrime(i) == True):
+      print "######################",i
+

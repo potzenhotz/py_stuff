@@ -30,4 +30,5 @@ for i in range(1,int(limit_divide_multipels[1])+1):  #range geht nur bis n
 result_sum_of_multiples = sum(set(sum_of_multiples))
 
 print result_sum_of_multiples
+print type(multipels)
 
