@@ -52,7 +52,6 @@ else:
   
   email_dict_keys_list = list(email_dict.keys())
   to_addrs  = email_dict['Lukas']
-  print(to_addrs)
 
   #setup the email subject
   subject = 'Wetterbericht fuer ' + str(email_dict_keys_list[0]) + ' [PROTOTYP]'
