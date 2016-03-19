@@ -2,7 +2,8 @@
 
 import weather_script as ws
 import useful_stuff as us
-
+import os
+print (os.environ['HOME'])
 city_dict = {'Dortmund': 'Dortmund' + ', ger'
             ,'Hamburg': 'Hamburg' + ', ger'
             ,'Luebeck': 'Luebeck' + ', ger'
@@ -17,7 +18,7 @@ email_dict = {'Lukas': 'lukasmuessle@gmail.com'
 
 
 pwd_file_name = 'python_mailing_bot.txt'
-pwd_file_loc = '/Users/Potzenhotz/Documents/'
+pwd_file_loc = os.environ['HOME'] + '/Documents/'
 
 
 pwd_mail = us.read_certain_line(pwd_file_name,pwd_file_loc,0)
