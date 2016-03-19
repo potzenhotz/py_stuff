@@ -3,6 +3,7 @@
 import pyowm
 from pyowm import timeutils
 from datetime import datetime
+
 #-----------------------------------------------------------------------
 #Useful functions
 #-----------------------------------------------------------------------
