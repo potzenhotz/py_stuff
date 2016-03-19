@@ -61,7 +61,7 @@ else:
   for cities_var in user_cities['Lukas']:
     body_msg += '\n' + str(ws.current_weather(city_dict[cities_var]))
 
-  send actual mail 
+  #send actual mail 
   us.send_mail(to_addrs, subject, body_msg, pwd_mail)
 
 
