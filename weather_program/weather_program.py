@@ -23,8 +23,9 @@ email_dict = {'Lukas': 'lukasmuessle@gmail.com'
               ,'Alex': 'a.craemer@gmail.com' 
               }
 
-lukas_cities = ['Dortmund', 'Koeln', 'Duesseldorf']
-alex_cities = ['Dortmund', 'Luebeck']
+#lukas_cities = ['Koeln', 'Duesseldorf','Dortmund']
+lukas_cities = ['Koeln', 'Duesseldorf']
+alex_cities = ['Luebeck']
 
 user_cities = {'Lukas': lukas_cities
             ,'Alex': alex_cities
@@ -58,11 +59,14 @@ for user in users:
   
     #setup the email subject
     subject = 'Wetterbericht fuer ' + str(user) + ' [PROTOTYP]'
+
     #body of email
     body_msg = 'Diese Staedte hast du aboniert:'
     for cities_var in user_cities[user]:
-      body_msg += '\n' + str(ws.current_weather(city_dict[cities_var]))
+      body_msg += str(ws.current_weather(city_dict[cities_var]))
+      body_msg += '\n'
   
+    #print(body_msg)
     #send actual mail 
     us.send_mail(to_addrs, subject, body_msg, pwd_mail)
   
