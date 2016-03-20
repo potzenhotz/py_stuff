@@ -26,7 +26,7 @@ email_dict = {'Lukas': 'lukasmuessle@gmail.com'
               }
 
 #lukas_cities = ['Koeln', 'Duesseldorf','Dortmund']
-lukas_cities = ['Koeln']
+lukas_cities = ['Dortmund']
 lukas_work_cities = ['Duesseldorf']
 alex_cities = ['Luebeck']
 
@@ -36,6 +36,7 @@ user_cities = {'Lukas': lukas_cities
             }
 
 users = ['Lukas', 'Alex', 'LukasWork']
+#users = ['Lukas']
 
 for user in users:
   #-----------------------------------------------------------------------
@@ -75,7 +76,8 @@ for user in users:
     except ValueError:
       print("%%%Value Error.%%%")
     except KeyError:
-      print("%%%City name error.%%%")
+      print("%%%City name error.%%%", sys.exc_info())
+
     except:
       print("Unexpected error:", sys.exc_info()[0])
       raise  

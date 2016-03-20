@@ -63,80 +63,6 @@ def current_weather(input_city):
   #-----------------------------------------------------------------------
   #Get the weather data of the location object
   #-----------------------------------------------------------------------
-  weather = obs.get_weather()
-  
-  wind = weather.get_wind()
-  wind_speed = wind['speed']
-  wind_deg = wind['deg']
-  temp = weather.get_temperature(unit='celsius')
-  temp_max = temp['temp_max']
-  temp_min = temp['temp_min']
-  temperature = temp['temp']
-  pressure = weather.get_pressure()
-  press_local = pressure['press']
-  press_sea = pressure['sea_level']
-  sunrise_unix = weather.get_sunrise_time()
-  sunrise = change_time_format(sunrise_unix)
-  sunset_unix = weather.get_sunset_time()
-  sunset = change_time_format(sunset_unix)
-  
-
-
-  #One full dict for all weather data
-  weather_dict = {'Cloud cover': weather.get_clouds()
-                  ,'Humidity' : str(weather.get_humidity()) + '%'
-                  ,'Sky' : weather.get_detailed_status()
-                  ,'Rain volume last 3h' : weather.get_rain()
-                  ,'Snow volume last 3h' : weather.get_snow()
-                  ,'Wind speed' : str(wind_speed) + ' m/s'
-                  ,'Wind deg' : str(wind_deg) + u'\N{DEGREE SIGN}'
-                  ,'Temperature' : str(temperature) + u' \N{DEGREE SIGN}' + 'C'
-                  ,'Temp_max' : str(temp_max) + u' \N{DEGREE SIGN}' + 'C'
-                  ,'Temp_min' : str(temp_min) + u' \N{DEGREE SIGN}' + 'C'
-                  ,'Pressure' : str(press_local) + ' hPa'
-                  ,'Pressure at sea level' : str(press_sea) + ' hPa'
-                  ,'Sunrise' : sunrise
-                  ,'Sunset' : sunset
-                  }
-
-  #Different logical specified weather dicts 
-  wind_dict = {'Wind speed' : str(wind_speed) + ' m/s'
-               ,'Wind direction' : str(wind_deg) + u'\N{DEGREE SIGN}'
-              }
-  
-  sky_condition = {'Cloud cover': weather.get_clouds()
-                   ,'Sky' : weather.get_detailed_status()
-                  }
-  
-  precipitation_dict = {'Humidity' : str(weather.get_humidity()) + '%'
-                       ,'Rain volume last 3h' : weather.get_rain()
-                       ,'Snow volume last 3h' : weather.get_snow()
-                      }
-  temp_dict = {'Temperature' : str(temperature) + u' \N{DEGREE SIGN}' + 'C'
-              ,'Temp_max' : str(temp_max) + u' \N{DEGREE SIGN}' + 'C'
-              ,'Temp_min' : str(temp_min) + u' \N{DEGREE SIGN}' + 'C'
-              }
-  
-  sun_dict = {'Sunrise' : sunrise
-              ,'Sunset' : sunset
-              }
-  
-  pressure_dict = {'Pressure' : str(press_local) + ' hPa'
-                    ,'Pressure at sea level' : str(press_sea) + ' hPa'
-                  }
-
-  
-  #-----------------------------------------------------------------------
-  #FORECAST
-  #-----------------------------------------------------------------------
-
-  fc_object_3h = owm.three_hours_forecast(input_city)  
-  fc_object_daily = owm.daily_forecast(input_city, limit=7)  
-
-  f_3h = fc_object_3h.get_forecast()
-  f_daily = fc_object_daily.get_forecast()
-
-  #time_yesterday = timeutils.yesterday(12, 00) 
   today_06 = str(time.strftime("%Y-%m-%d")) + ' 06:00:00+00'
   today_09 = str(time.strftime("%Y-%m-%d")) + ' 09:00:00+00'
   today_12 = str(time.strftime("%Y-%m-%d")) + ' 12:00:00+00'
@@ -158,61 +84,125 @@ def current_weather(input_city):
                     ,tomorrow_12
                     ,tomorrow_15
                     ,tomorrow_18]
-  #test1 = fc_object_3h.get_weather_at(tomorrow_06)
-  #test5 = fc_object_daily.get_weather_at(timeutils.tomorrow(15,00))
-  #test = test1.get_clouds()
-  #time = test1.get_reference_time('iso')
-
-  today_fc_3h = 'Forecast for today:'
-  tomorrow_fc_3h = 'Forecast for tomorrow:'
-  seven_days_fc = 'Forecast for the next 6 days:'
-  for weather in f_3h:
-      for times in fc_times_today:
-        if weather.get_reference_time('iso') == times: 
-          time_string = str(weather.get_reference_time('iso'))
-          time_string = time_string[:-6]
-          today_fc_3h += '\n' + time_string + ' '+ str(weather.get_status())
-      for times in fc_times_tomorrow:
-        if weather.get_reference_time('iso') == times:
-          time_string = str(weather.get_reference_time('iso'))
-          time_string = time_string[:-6]
-          tomorrow_fc_3h += '\n' + time_string + ' ' + str(weather.get_status())
-          
-  for weather in f_daily:
-      time_string = str(weather.get_reference_time('iso'))
-      time_string = time_string[:-6]
-      seven_days_fc += '\n' + time_string + ' '+ str(weather.get_status())
 
 
-  #test=fc_object_daily.when_starts('iso')
-
-  #-----------------------------------------------------------------------
-  #Print section for testing
-  #In future maybee outside
-  #-----------------------------------------------------------------------
   output ='\n' + '###%s### %s(%s, %s)' % (time_of_obs,city,lat,lon)
-  output += '\n'+'#################################################################'
-  output += '\n' + today_fc_3h
-  output += '\n'+'-----------------------------------------------------------------'
-  output += '\n' + tomorrow_fc_3h
-  output += '\n'+'-----------------------------------------------------------------'
-  output += '\n' + seven_days_fc
-  output += '\n'+'#################################################################'
-  output +='\n' + 'Weather observations %s %s(%s, %s):' % (time_of_obs,city,lat,lon)
-  output += '\n'+'-----------------------------------------------------------------'
-  output += '\n'+pp_str(sun_dict)
-  output += '\n'+'-----------------------------------------------------------------'
-  output += '\n'+pp_str(temp_dict)
-  output += '\n'+'-----------------------------------------------------------------'
-  output += '\n'+pp_str(pressure_dict)
-  output += '\n'+'-----------------------------------------------------------------'
-  output += '\n'+pp_str(wind_dict)
-  output += '\n'+'-----------------------------------------------------------------'
-  output += '\n'+pp_str(precipitation_dict)
-  output += '\n'+'-----------------------------------------------------------------'
-  output += '\n'+pp_str(sky_condition)
-  output += '\n'+'-----------------------------------------------------------------'
-  output += '\n'+'#################################################################'
+  fc_object_3h = owm.three_hours_forecast(input_city)  
+  fc_object_daily = owm.daily_forecast(input_city, limit=7)  
+
+  observat = obs.get_weather()
+  f_3h = fc_object_3h.get_forecast()
+  f_daily = fc_object_daily.get_forecast()
+
+  weather_dict = {'forecast3':f_3h,'forecast_daily': f_daily,'observation': observat}
+  #for weather in weather_list: 
+  for key in sorted(weather_dict):
+    print(key )
+    weather = weather_dict[key]
+    if key == 'observation':
+      wind = weather.get_wind()
+      wind_speed = wind['speed']
+      wind_deg = wind['deg']
+      temp = weather.get_temperature(unit='celsius')
+      temp_max = temp['temp_max']
+      temp_min = temp['temp_min']
+      temperature = temp['temp']
+      pressure = weather.get_pressure()
+      press_local = pressure['press']
+      press_sea = pressure['sea_level']
+      sunrise_unix = weather.get_sunrise_time()
+      sunrise = change_time_format(sunrise_unix)
+      sunset_unix = weather.get_sunset_time()
+      sunset = change_time_format(sunset_unix)
+
+      
+
+      #Different logical specified weather dicts 
+      wind_dict = {'Wind speed' : str(wind_speed) + ' m/s'
+                   ,'Wind direction' : str(wind_deg) + u'\N{DEGREE SIGN}'
+                  }
+      
+      sky_condition = {'Cloud cover': weather.get_clouds()
+                       ,'Sky' : weather.get_detailed_status()
+                      }
+      
+      precipitation_dict = {'Humidity' : str(weather.get_humidity()) + '%'
+                           ,'Rain volume last 3h' : weather.get_rain()
+                           ,'Snow volume last 3h' : weather.get_snow()
+                          }
+      temp_dict = {'Temperature' : str(temperature) + u' \N{DEGREE SIGN}' + 'C'
+                  ,'Temp_max' : str(temp_max) + u' \N{DEGREE SIGN}' + 'C'
+                  ,'Temp_min' : str(temp_min) + u' \N{DEGREE SIGN}' + 'C'
+                  }
+      
+      sun_dict = {'Sunrise' : sunrise
+                  ,'Sunset' : sunset
+                  }
+      
+      pressure_dict = {'Pressure' : str(press_local) + ' hPa'
+                        ,'Pressure at sea level' : str(press_sea) + ' hPa'
+                      }
+
+      
+    #-----------------------------------------------------------------------
+    #FORECAST
+    #-----------------------------------------------------------------------
+
+    today_fc_3h = 'Forecast for today:'
+    tomorrow_fc_3h = 'Forecast for tomorrow:'
+    seven_days_fc = 'Forecast for the next 6 days:'
+    if key == 'forecast3':
+      for weather_part in weather:
+        for times in fc_times_today:
+          #if weather.get_reference_time('iso') == times: 
+          if weather_part.get_reference_time('iso') == times: 
+            time_string = str(weather_part.get_reference_time('iso'))
+            time_string = time_string[:-6]
+            today_fc_3h += '\n' + time_string + ' '+ str(weather_part.get_status())
+        for times in fc_times_tomorrow:
+          if weather_part.get_reference_time('iso') == times:
+            time_string = str(weather_part.get_reference_time('iso'))
+            time_string = time_string[:-6]
+            tomorrow_fc_3h += '\n' + time_string + ' ' + str(weather_part.get_status())
+            
+    if key == 'forecast_daily':
+      for weather_part in weather:
+        time_string = str(weather_part.get_reference_time('iso'))
+        time_string = time_string[:-6]
+        seven_days_fc += '\n' + time_string + ' '+ str(weather_part.get_status())
+        print(weather_part.get_temperature())
+
+    #test=fc_object_daily.when_starts('iso')
+
+    #-----------------------------------------------------------------------
+    #Print section for testing
+    #In future maybee outside
+    #-----------------------------------------------------------------------
+    if key == 'forecast3':
+      output += '\n'+'#################################################################'
+      output += '\n' + today_fc_3h
+      output += '\n'+'-----------------------------------------------------------------'
+      output += '\n' + tomorrow_fc_3h
+    if key == 'forecast_daily':
+      output += '\n'+'-----------------------------------------------------------------'
+      output += '\n' + seven_days_fc
+      output += '\n'+'#################################################################'
+    if key == 'observation':
+      output +='\n' + 'Weather observations %s %s(%s, %s):' % (time_of_obs,city,lat,lon)
+      output += '\n'+'-----------------------------------------------------------------'
+      output += '\n'+pp_str(sun_dict)
+      output += '\n'+'-----------------------------------------------------------------'
+      output += '\n'+pp_str(temp_dict)
+      output += '\n'+'-----------------------------------------------------------------'
+      output += '\n'+pp_str(pressure_dict)
+      output += '\n'+'-----------------------------------------------------------------'
+      output += '\n'+pp_str(wind_dict)
+      output += '\n'+'-----------------------------------------------------------------'
+      output += '\n'+pp_str(precipitation_dict)
+      output += '\n'+'-----------------------------------------------------------------'
+      output += '\n'+pp_str(sky_condition)
+      output += '\n'+'-----------------------------------------------------------------'
+      output += '\n'+'#################################################################'
  #output += '\n' + str(test1)
   #output += '\n' + str(test2)
   #output += '\n' + str(test3)
