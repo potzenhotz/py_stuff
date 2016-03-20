@@ -88,7 +88,7 @@ def current_weather(input_city):
 
   output ='\n' + '###%s### %s(%s, %s)' % (time_of_obs,city,lat,lon)
   fc_object_3h = owm.three_hours_forecast(input_city)  
-  fc_object_daily = owm.daily_forecast(input_city, limit=7)  
+  fc_object_daily = owm.daily_forecast(input_city, limit=4)  
 
   observat = obs.get_weather()
   f_3h = fc_object_3h.get_forecast()
@@ -97,7 +97,6 @@ def current_weather(input_city):
   weather_dict = {'forecast3':f_3h,'forecast_daily': f_daily,'observation': observat}
   #for weather in weather_list: 
   for key in sorted(weather_dict):
-    print(key )
     weather = weather_dict[key]
     if key == 'observation':
       wind = weather.get_wind()
@@ -150,7 +149,7 @@ def current_weather(input_city):
 
     today_fc_3h = 'Forecast for today:'
     tomorrow_fc_3h = 'Forecast for tomorrow:'
-    seven_days_fc = 'Forecast for the next 6 days:'
+    seven_days_fc = 'Forecast for today and the next 3 days:'
     if key == 'forecast3':
       for weather_part in weather:
         for times in fc_times_today:
@@ -169,8 +168,27 @@ def current_weather(input_city):
       for weather_part in weather:
         time_string = str(weather_part.get_reference_time('iso'))
         time_string = time_string[:-6]
-        seven_days_fc += '\n' + time_string + ' '+ str(weather_part.get_status())
-        print(weather_part.get_temperature())
+        seven_days_fc += '\n' + '[STATUS] ' + time_string + '\nForecast: '+ str(weather_part.get_status())
+          
+        fc_temp_daily = weather_part.get_temperature(unit='celsius')
+        fc_temp_daily_morn = str(fc_temp_daily['morn']) + u'\N{DEGREE SIGN}' + 'C'
+        fc_temp_daily_day = str(fc_temp_daily['day']) + u'\N{DEGREE SIGN}' + 'C'
+        fc_temp_daily_eve = str(fc_temp_daily['eve']) + u'\N{DEGREE SIGN}' + 'C'
+        fc_temp_daily_night = str(fc_temp_daily['night']) + u'\N{DEGREE SIGN}' + 'C'
+        fc_temp_daily_max = str(fc_temp_daily['max']) + u'\N{DEGREE SIGN}' + 'C'
+        fc_temp_daily_min = str(fc_temp_daily['min']) + u'\N{DEGREE SIGN}' + 'C'
+        seven_days_fc += '\n' + '[TEMP] \nMorning: %s \nDay: %s \nEvening: %s \nNight: %s' \
+                        % (fc_temp_daily_morn, fc_temp_daily_day, fc_temp_daily_eve, fc_temp_daily_night)
+
+        fc_wind_daily = weather_part.get_wind()
+        fc_wind_speed_daily = fc_wind_daily['speed']
+        seven_days_fc += '\n' + '[Wind] \n' + 'Average: ' + str(fc_wind_speed_daily) + ' m/s'
+
+        fc_rain_daily_raw = weather_part.get_rain()
+        fc_rain_daily = fc_rain_daily_raw['all']
+        seven_days_fc += '\n' + '[Precipitation] \n' + 'Rain: ' + str(fc_rain_daily) + ' mm'
+
+        seven_days_fc += '\n'+'-----------------------------------------------------------------'
 
     #test=fc_object_daily.when_starts('iso')
 

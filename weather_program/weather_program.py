@@ -26,7 +26,7 @@ email_dict = {'Lukas': 'lukasmuessle@gmail.com'
               }
 
 #lukas_cities = ['Koeln', 'Duesseldorf','Dortmund']
-lukas_cities = ['Dortmund']
+lukas_cities = ['Koeln']
 lukas_work_cities = ['Duesseldorf']
 alex_cities = ['Luebeck']
 
@@ -36,7 +36,7 @@ user_cities = {'Lukas': lukas_cities
             }
 
 #users = ['Lukas', 'Alex', 'LukasWork']
-users = ['Lukas']
+users = ['Lukas', 'LukasWork']
 
 for user in users:
   #-----------------------------------------------------------------------
