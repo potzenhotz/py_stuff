@@ -3,6 +3,7 @@
 import pyowm
 from pyowm import timeutils
 from datetime import datetime
+import time
 
 #-----------------------------------------------------------------------
 #Useful functions
@@ -130,17 +131,58 @@ def current_weather(input_city):
   #-----------------------------------------------------------------------
 
   fc_object_3h = owm.three_hours_forecast(input_city)  
-  fc_object_daily = owm.daily_forecast(input_city, limit=6)  
+  fc_object_daily = owm.daily_forecast(input_city, limit=7)  
 
   f_3h = fc_object_3h.get_forecast()
   f_daily = fc_object_daily.get_forecast()
 
-  time_yesterday = timeutils.yesterday(12, 00) 
-  time_tomorrow=timeutils.tomorrow(15,00)
-  #test = time_tomorrow
-  test1 = fc_object_3h.get_weather_at(timeutils.tomorrow(15,00))
-  test = test1.get_clouds()
-  time = test1.get_reference_time('iso')
+  #time_yesterday = timeutils.yesterday(12, 00) 
+  today_06 = str(time.strftime("%Y-%m-%d")) + ' 06:00:00+00'
+  today_09 = str(time.strftime("%Y-%m-%d")) + ' 09:00:00+00'
+  today_12 = str(time.strftime("%Y-%m-%d")) + ' 12:00:00+00'
+  today_15 = str(time.strftime("%Y-%m-%d")) + ' 15:00:00+00'
+  today_18 = str(time.strftime("%Y-%m-%d")) + ' 18:00:00+00'
+  tomorrow_06=str(timeutils.tomorrow(6,00)) + '+00'
+  tomorrow_09=str(timeutils.tomorrow(9,00)) + '+00'
+  tomorrow_12=str(timeutils.tomorrow(12,00)) + '+00'
+  tomorrow_15=str(timeutils.tomorrow(15,00)) + '+00'
+  tomorrow_18=str(timeutils.tomorrow(18,00)) + '+00'
+
+  fc_times_today = [today_06
+                    ,today_09
+                    ,today_12
+                    ,today_15
+                    ,today_18]
+  fc_times_tomorrow = [tomorrow_06
+                    ,tomorrow_09
+                    ,tomorrow_12
+                    ,tomorrow_15
+                    ,tomorrow_18]
+  #test1 = fc_object_3h.get_weather_at(tomorrow_06)
+  #test5 = fc_object_daily.get_weather_at(timeutils.tomorrow(15,00))
+  #test = test1.get_clouds()
+  #time = test1.get_reference_time('iso')
+
+  today_fc_3h = 'Forecast for today:'
+  tomorrow_fc_3h = 'Forecast for tomorrow:'
+  seven_days_fc = 'Forecast for the next 6 days:'
+  for weather in f_3h:
+      for times in fc_times_today:
+        if weather.get_reference_time('iso') == times: 
+          time_string = str(weather.get_reference_time('iso'))
+          time_string = time_string[:-6]
+          today_fc_3h += '\n' + time_string + ' '+ str(weather.get_status())
+      for times in fc_times_tomorrow:
+        if weather.get_reference_time('iso') == times:
+          time_string = str(weather.get_reference_time('iso'))
+          time_string = time_string[:-6]
+          tomorrow_fc_3h += '\n' + time_string + ' ' + str(weather.get_status())
+          
+  for weather in f_daily:
+      time_string = str(weather.get_reference_time('iso'))
+      time_string = time_string[:-6]
+      seven_days_fc += '\n' + time_string + ' '+ str(weather.get_status())
+
 
   #test=fc_object_daily.when_starts('iso')
 
@@ -148,8 +190,16 @@ def current_weather(input_city):
   #Print section for testing
   #In future maybee outside
   #-----------------------------------------------------------------------
-  output =('Wetter fuer die Stadt: %s (%s, %s)' % (city,lat,lon))
-  output += '\n'+' -----------------------------------------------------------------'
+  output ='\n' + '###%s### %s(%s, %s)' % (time_of_obs,city,lat,lon)
+  output += '\n'+'#################################################################'
+  output += '\n' + today_fc_3h
+  output += '\n'+'-----------------------------------------------------------------'
+  output += '\n' + tomorrow_fc_3h
+  output += '\n'+'-----------------------------------------------------------------'
+  output += '\n' + seven_days_fc
+  output += '\n'+'#################################################################'
+  output +='\n' + 'Weather observations %s %s(%s, %s):' % (time_of_obs,city,lat,lon)
+  output += '\n'+'-----------------------------------------------------------------'
   output += '\n'+pp_str(sun_dict)
   output += '\n'+'-----------------------------------------------------------------'
   output += '\n'+pp_str(temp_dict)
@@ -163,6 +213,8 @@ def current_weather(input_city):
   output += '\n'+pp_str(sky_condition)
   output += '\n'+'-----------------------------------------------------------------'
   output += '\n'+'#################################################################'
-  output += str(test)
-  output += str(time)
+ #output += '\n' + str(test1)
+  #output += '\n' + str(test2)
+  #output += '\n' + str(test3)
+  #output += '\n' + str(test4)
   return output

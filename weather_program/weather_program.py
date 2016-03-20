@@ -5,6 +5,7 @@
 import weather_script as ws
 import useful_stuff as us
 import os
+import sys
 
 #-----------------------------------------------------------------------
 #Dictionaries for Cities and Users(Email)
@@ -24,14 +25,14 @@ email_dict = {'Lukas': 'lukasmuessle@gmail.com'
               }
 
 #lukas_cities = ['Koeln', 'Duesseldorf','Dortmund']
-lukas_cities = ['Koeln', 'Duesseldorf']
+lukas_cities = ['Koeln']
 alex_cities = ['Luebeck']
 
 user_cities = {'Lukas': lukas_cities
             ,'Alex': alex_cities
             }
 
-users = ['Lukas']
+users = ['Lukas', 'Alex']
 
 for user in users:
   #-----------------------------------------------------------------------
@@ -61,11 +62,21 @@ for user in users:
     subject = 'Wetterbericht fuer ' + str(user) + ' [PROTOTYP]'
 
     #body of email
-    body_msg = 'Diese Staedte hast du aboniert:'
-    for cities_var in user_cities[user]:
-      body_msg += str(ws.current_weather(city_dict[cities_var]))
-      body_msg += '\n'
-  
+    try:
+      body_msg = 'Diese Staedte hast du aboniert:'
+      for cities_var in user_cities[user]:
+        body_msg += str(ws.current_weather(city_dict[cities_var]))
+        body_msg += '\n'
+    except OSError as err:
+      print("OS error: {0}".format(err))
+    except ValueError:
+      print("%%%Value Error.%%%")
+    except KeyError:
+      print("%%%City name error.%%%")
+    except:
+      print("Unexpected error:", sys.exc_info()[0])
+      raise  
+
     #print(body_msg)
     #send actual mail 
     us.send_mail(to_addrs, subject, body_msg, pwd_mail)
