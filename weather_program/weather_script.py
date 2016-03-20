@@ -129,9 +129,9 @@ def current_weather(input_city):
                            ,'Rain volume last 3h' : weather.get_rain()
                            ,'Snow volume last 3h' : weather.get_snow()
                           }
-      temp_dict = {'Temperature' : str(temperature) + u' \N{DEGREE SIGN}' + 'C'
-                  ,'Temp_max' : str(temp_max) + u' \N{DEGREE SIGN}' + 'C'
-                  ,'Temp_min' : str(temp_min) + u' \N{DEGREE SIGN}' + 'C'
+      temp_dict = {'Temperature' : str(temperature) + u'\N{DEGREE SIGN}' + 'C'
+                  ,'Temp_max' : str(temp_max) + u'\N{DEGREE SIGN}' + 'C'
+                  ,'Temp_min' : str(temp_min) + u'\N{DEGREE SIGN}' + 'C'
                   }
       
       sun_dict = {'Sunrise' : sunrise
