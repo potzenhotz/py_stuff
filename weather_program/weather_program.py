@@ -35,8 +35,8 @@ user_cities = {'Lukas': lukas_cities
             ,'LukasWork': lukas_work_cities
             }
 
-users = ['Lukas', 'Alex', 'LukasWork']
-#users = ['Lukas']
+#users = ['Lukas', 'Alex', 'LukasWork']
+users = ['Lukas']
 
 for user in users:
   #-----------------------------------------------------------------------
