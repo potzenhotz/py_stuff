@@ -1,9 +1,11 @@
 #Python script for rss feed read of weather data
 
+import time
 import pyowm
+import useful_stuff as us
 from pyowm import timeutils
 from datetime import datetime
-import time
+
 
 #-----------------------------------------------------------------------
 #Useful functions
@@ -157,18 +159,21 @@ def current_weather(input_city):
           if weather_part.get_reference_time('iso') == times: 
             time_string = str(weather_part.get_reference_time('iso'))
             time_string = time_string[:-6]
-            today_fc_3h += '\n' + time_string + ' '+ str(weather_part.get_status())
+            today_fc_3h += '\n' + time_string + ' '+ str(weather_part.get_detailed_status())
         for times in fc_times_tomorrow:
           if weather_part.get_reference_time('iso') == times:
             time_string = str(weather_part.get_reference_time('iso'))
             time_string = time_string[:-6]
-            tomorrow_fc_3h += '\n' + time_string + ' ' + str(weather_part.get_status())
+            tomorrow_fc_3h += '\n' + time_string + ' ' + str(weather_part.get_detailed_status())
             
     if key == 'forecast_daily':
       for weather_part in weather:
         time_string = str(weather_part.get_reference_time('iso'))
         time_string = time_string[:-6]
-        seven_days_fc += '\n' + '[STATUS] ' + time_string + '\nForecast: '+ str(weather_part.get_status())
+        caption = '[STATUS] '
+        caption_bold = us.color.BOLD + '[STATUS] ' + us.color.END
+        caption_red = us.color.RED + caption_bold  + us.color.END
+        seven_days_fc += '\n' + caption_bold + time_string + '\nForecast: '+ str(weather_part.get_status())
           
         fc_temp_daily = weather_part.get_temperature(unit='celsius')
         fc_temp_daily_morn = str(fc_temp_daily['morn']) + u'\N{DEGREE SIGN}' + 'C'
@@ -177,20 +182,29 @@ def current_weather(input_city):
         fc_temp_daily_night = str(fc_temp_daily['night']) + u'\N{DEGREE SIGN}' + 'C'
         fc_temp_daily_max = str(fc_temp_daily['max']) + u'\N{DEGREE SIGN}' + 'C'
         fc_temp_daily_min = str(fc_temp_daily['min']) + u'\N{DEGREE SIGN}' + 'C'
-        seven_days_fc += '\n' + '[TEMP] \nMorning: %s \nDay: %s \nEvening: %s \nNight: %s' \
+        caption = '[TEMP] '
+        caption_bold = us.color.BOLD + '[TEMP] ' + us.color.END
+        caption_red = us.color.RED + caption  + us.color.END
+        seven_days_fc += '\n' + caption_bold +'\nMorning: %s \nDay: %s \nEvening: %s \nNight: %s' \
                         % (fc_temp_daily_morn, fc_temp_daily_day, fc_temp_daily_eve, fc_temp_daily_night)
 
         fc_wind_daily = weather_part.get_wind()
         fc_wind_speed_daily = fc_wind_daily['speed']
-        seven_days_fc += '\n' + '[Wind] \n' + 'Average: ' + str(fc_wind_speed_daily) + ' m/s'
+        caption = '[WIND] '
+        caption_bold = us.color.BOLD + '[WIND] ' + us.color.END
+        caption_red = us.color.RED + caption  + us.color.END
+        seven_days_fc += '\n' + caption_bold  +'\n' + 'Average: ' + str(fc_wind_speed_daily) + ' m/s'
 
         fc_rain_daily_raw = weather_part.get_rain()
+        caption = '[PRECIPITATION] '
+        caption_bold = us.color.BOLD + '[PRECIPITATION] ' + us.color.END
+        caption_red = us.color.RED + caption  + us.color.END
         try:
           fc_rain_daily = fc_rain_daily_raw['all']
-          seven_days_fc += '\n' + '[Precipitation] \n' + 'Rain: ' + str(fc_rain_daily) + ' mm'
+          seven_days_fc += '\n' + caption_bold  + '\n' + 'Rain: ' + str(fc_rain_daily) + ' mm'
         except:
           fc_rain_daily = 'No rain :)'
-          seven_days_fc += '\n' + '[Precipitation] \n' + 'Rain: ' + str(fc_rain_daily)  
+          seven_days_fc += '\n' + caption_bold  + '\n' + 'Rain: ' + str(fc_rain_daily)  
 
         seven_days_fc += '\n'+'-----------------------------------------------------------------'
 

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 #Weather program using OpenWeatherMap
 
-
 import weather_script as ws
 import useful_stuff as us
 import os
@@ -23,20 +22,25 @@ city_dict = {'Dortmund': 'Dortmund' + ', ger'
 email_dict = {'Lukas': 'lukasmuessle@gmail.com'
               ,'Alex': 'a.craemer@gmail.com' 
               ,'LukasWork': 'lukas.muessle@nttdata.com' 
+              ,'Florian': 'florian@mail-arends.de' 
               }
 
 #lukas_cities = ['Koeln', 'Duesseldorf','Dortmund']
 lukas_cities = ['Koeln']
 lukas_work_cities = ['Duesseldorf']
 alex_cities = ['Luebeck']
+florian_cities = ['Duesseldorf']
 
 user_cities = {'Lukas': lukas_cities
             ,'Alex': alex_cities
             ,'LukasWork': lukas_work_cities
+            ,'Florian': florian_cities
             }
 
 #users = ['Lukas', 'Alex', 'LukasWork']
 users = ['Lukas', 'LukasWork']
+users = ['Lukas']
+#users = ['Florian']
 
 for user in users:
   #-----------------------------------------------------------------------
@@ -63,6 +67,12 @@ for user in users:
     to_addrs  = email_dict[user]
   
     #setup the email subject
+    email_on=1
+
+    if email_on == 1:
+      text_format = 'html'
+    else:
+      text_format = 'plain'
     subject = 'Wetterbericht fuer ' + str(user) + ' [PROTOTYP]'
 
     #body of email
@@ -82,8 +92,20 @@ for user in users:
       print("Unexpected error:", sys.exc_info()[0])
       raise  
 
-    #print(body_msg)
-    #send actual mail 
-    us.send_mail(to_addrs, subject, body_msg, pwd_mail)
+    
+    #converts \n into html code
+    if text_format == 'html':
+      body_msg = body_msg.replace("\n", "<br />")
+      bold_open='<b>'
+      bold_close='</b>'
+      body_msg = body_msg.replace(us.color.BOLD, bold_open)
+      body_msg = body_msg.replace(us.color.END, bold_close)
+
+
+    #send actual mail in html oder plain text 
+    if email_on == 1:
+      us.send_mail(to_addrs, subject, body_msg, pwd_mail, text_format)
+    else:
+      print(body_msg)
   
 

@@ -10,7 +10,7 @@ def read_certain_line(file_name,file_loc,linenumber):
   return pwd_read[linenumber]
 
 
-def send_mail(to_addr, subject, body,password):
+def send_mail(to_addr, subject, body,password, text_format):
   import smtplib
   from email.mime.text import MIMEText
   from email.mime.multipart import MIMEMultipart
@@ -21,7 +21,10 @@ def send_mail(to_addr, subject, body,password):
   msg['From'] = from_addr
   msg['To'] = to_addr
   msg['Subject'] = subject 
-  msg.attach(MIMEText(body,'plain','utf-8'))
+  if text_format == 'plain':
+    msg.attach(MIMEText(body,'plain','utf-8'))
+  elif text_format == 'html':
+    msg.attach(MIMEText(body,'html'))
   msg_final = msg.as_string().encode('ascii')
 
 
@@ -34,3 +37,17 @@ def send_mail(to_addr, subject, body,password):
   server.login(username,password)
   server.sendmail(from_addr, to_addr, msg_final)
   server.quit()
+
+class color:
+   PURPLE = '\033[95m'
+   CYAN = '\033[96m'
+   DARKCYAN = '\033[36m'
+   BLUE = '\033[94m'
+   GREEN = '\033[92m'
+   YELLOW = '\033[93m'
+   RED = '\033[91m'
+   BOLD = '\033[1m'
+   UNDERLINE = '\033[4m'
+   END = '\033[0m'
+
+
