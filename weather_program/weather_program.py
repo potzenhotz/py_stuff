@@ -67,7 +67,7 @@ for user in users:
 
     #body of email
     try:
-      body_msg = 'Diese Staedte hast du aboniert:'
+      body_msg = 'Diese Staedte hast du abonniert:'
       for cities_var in user_cities[user]:
         body_msg += str(ws.current_weather(city_dict[cities_var]))
         body_msg += '\n'
