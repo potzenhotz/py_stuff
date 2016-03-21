@@ -23,6 +23,7 @@ email_dict = {'Lukas': 'lukasmuessle@gmail.com'
               ,'Alex': 'a.craemer@gmail.com' 
               ,'LukasWork': 'lukas.muessle@nttdata.com' 
               ,'Florian': 'florian@mail-arends.de' 
+              ,'Frederic': 'frederic.krehl@nttdata.com' 
               }
 
 #lukas_cities = ['Koeln', 'Duesseldorf','Dortmund']
@@ -30,16 +31,18 @@ lukas_cities = ['Koeln']
 lukas_work_cities = ['Duesseldorf']
 alex_cities = ['Luebeck']
 florian_cities = ['Duesseldorf']
+frederic_cities = ['Muenchen']
 
 user_cities = {'Lukas': lukas_cities
             ,'Alex': alex_cities
             ,'LukasWork': lukas_work_cities
             ,'Florian': florian_cities
+            ,'Frederic': frederic_cities
             }
 
-#users = ['Lukas', 'Alex', 'LukasWork']
-users = ['Lukas', 'LukasWork']
-users = ['Lukas']
+users = ['Lukas', 'Alex', 'LukasWork', 'Florian', 'Frederic']
+#users = ['Lukas', 'LukasWork']
+#users = ['Lukas']
 #users = ['Florian']
 
 for user in users:
