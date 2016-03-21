@@ -185,7 +185,6 @@ def current_weather(input_city):
         seven_days_fc += '\n' + '[Wind] \n' + 'Average: ' + str(fc_wind_speed_daily) + ' m/s'
 
         fc_rain_daily_raw = weather_part.get_rain()
-        print(fc_rain_daily_raw)
         try:
           fc_rain_daily = fc_rain_daily_raw['all']
           seven_days_fc += '\n' + '[Precipitation] \n' + 'Rain: ' + str(fc_rain_daily) + ' mm'
