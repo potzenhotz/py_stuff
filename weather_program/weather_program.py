@@ -40,7 +40,8 @@ user_cities = {'Lukas': lukas_cities
             ,'Frederic': frederic_cities
             }
 
-users = ['Lukas', 'Alex', 'LukasWork', 'Florian', 'Frederic']
+#users = ['Lukas', 'Alex', 'LukasWork', 'Florian', 'Frederic']
+users = ['Lukas', 'LukasWork', 'Alex']
 #users = ['Lukas', 'LukasWork']
 #users = ['Lukas']
 #users = ['Florian']
