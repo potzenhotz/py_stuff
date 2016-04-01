@@ -5,6 +5,7 @@ import weather_script as ws
 import useful_stuff as us
 import os
 import sys
+import time
 
 #-----------------------------------------------------------------------
 #Dictionaries for Cities and Users(Email)
@@ -16,7 +17,12 @@ city_dict = {'Dortmund': 'Dortmund' + ', ger'
             ,'Luebeck': 'Luebeck' + ', ger'
             ,'Koeln': 'Koeln' + ', ger'
             ,'Duesseldorf': 'Duesseldorf' + ', ger'
+            ,'Essen': 'Essen' + ', ger'
             ,'Muenchen': 'Muenchen' + ', ger'
+            ,'Madison': 'Madison' + ', us'
+            ,'Oslo': 'Oslo' + ', no'
+            ,'Noordwijk': 'Noordwijk' + ', nl'
+            ,'Osnarbrueck': 'Osnarbrueck' + ', ger'
             }
 
 email_dict = {'Lukas': 'lukasmuessle@gmail.com'
@@ -24,92 +30,126 @@ email_dict = {'Lukas': 'lukasmuessle@gmail.com'
               ,'LukasWork': 'lukas.muessle@nttdata.com' 
               ,'Florian': 'florian@mail-arends.de' 
               ,'Frederic': 'frederic.krehl@nttdata.com' 
+              ,'Micha': 'michael.menzel@nttdata.com' 
+              ,'Friedel': 'sagzero@gmx.de' 
+              ,'Jonathan': '' 
+              ,'Jobst': 'jobstmuesse@gmail.com' 
+              ,'Tim': 'tim.muessle@gmx.de' 
               }
 
 #lukas_cities = ['Koeln', 'Duesseldorf','Dortmund']
 lukas_cities = ['Koeln']
 lukas_work_cities = ['Duesseldorf']
 alex_cities = ['Luebeck']
-florian_cities = ['Duesseldorf']
+florian_cities = ['Osnarbrueck']
 frederic_cities = ['Muenchen']
+micha_cities = ['Koeln']
+friedel_cities = ['Noordwijk']
+jonathan_cities = ['Oslo']
+jobst_cities = ['Madison']
+tim_cities = ['Essen']
 
 user_cities = {'Lukas': lukas_cities
             ,'Alex': alex_cities
             ,'LukasWork': lukas_work_cities
             ,'Florian': florian_cities
             ,'Frederic': frederic_cities
+            ,'Micha': micha_cities
+            ,'Friedel': friedel_cities
+            ,'Jonathan': jonathan_cities
+            ,'Jobst': jobst_cities
+            ,'Tim': tim_cities
             }
 
-#users = ['Lukas', 'Alex', 'LukasWork', 'Florian', 'Frederic']
-users = ['Lukas', 'LukasWork', 'Alex']
+users = ['Lukas'
+        , 'Alex'
+        , 'LukasWork'
+        , 'Florian'
+        , 'Frederic'
+        , 'Micha'
+        , 'Friedel'
+        #, 'Jonathan'
+        , 'Jobst'
+        , 'Tim'
+        ]
+#users = ['Lukas', 'LukasWork', 'Alex']
 #users = ['Lukas', 'LukasWork']
 #users = ['Lukas']
-#users = ['Florian']
 
 for user in users:
+ 
   #-----------------------------------------------------------------------
-  #Testing area
+  #Email configuration
   #-----------------------------------------------------------------------
-  test_flag = 0
+  pwd_file_name = 'python_mailing_bot.txt'
+  pwd_file_loc = os.environ['HOME'] + '/Documents/'
+ 
+  #reads first line of the file 
+  pwd_mail = us.read_certain_line(pwd_file_name,pwd_file_loc,0)
   
-  if test_flag == 1:
-    #for keys in city_dict:
-    #  ws.current_weather(city_dict[keys])
-    print(ws.current_weather(city_dict['Koeln']))
-  
-  else:  
-    #-----------------------------------------------------------------------
-    #Email configuration
-    #-----------------------------------------------------------------------
-    pwd_file_name = 'python_mailing_bot.txt'
-    pwd_file_loc = os.environ['HOME'] + '/Documents/'
-   
-    #reads first line of the file 
-    pwd_mail = us.read_certain_line(pwd_file_name,pwd_file_loc,0)
-    
-    email_dict_keys_list = list(email_dict.keys())
-    to_addrs  = email_dict[user]
-  
-    #setup the email subject
-    email_on=1
+  #email addr
+  email_dict_keys_list = list(email_dict.keys())
+  to_addrs  = email_dict[user]
 
-    if email_on == 1:
-      text_format = 'html'
-    else:
-      text_format = 'plain'
-    subject = 'Wetterbericht fuer ' + str(user) + ' [PROTOTYP]'
+  #setup the content of the email 
 
-    #body of email
+  #test_flag is email_on=0
+  email_on=1
+
+  #format of email
+  if email_on == 1:
+    text_format = 'html'
+  else:
+    text_format = 'plain'
+  subject = 'Wetterbericht fuer ' + str(user) + ' [PROTOTYP]'
+
+  #body of email with error handling
+  retries = 4
+  for i in range(retries):
     try:
-      body_msg = 'Diese Staedte hast du abonniert:'
+      body_msg = 'Einen schoenen guten Morgen, %s!' % (str(user))
+      body_msg += '\nDiese Staedte hast du abonniert:'
       for cities_var in user_cities[user]:
         body_msg += str(ws.current_weather(city_dict[cities_var]))
         body_msg += '\n'
     except OSError as err:
       print("OS error: {0}".format(err))
+      raise
     except ValueError:
       print("%%%Value Error.%%%")
+      raise
     except KeyError:
       print("%%%City name error.%%%", sys.exc_info())
-
+      raise
     except:
-      print("Unexpected error:", sys.exc_info()[0])
-      raise  
+      #for what ever reason it fails sometimes 
+      #we will try 3 times
+      if i < retries-1:
+        time.sleep(5) # delays for 5 seconds
+        continue
+      elif i ==  retries-1:
+        print('Es wurden %s Versuche unternommen!' %(i))
+        print("Unexpected error:", sys.exc_info()[0])
+        raise
+    break
 
-    
-    #converts \n into html code
-    if text_format == 'html':
-      body_msg = body_msg.replace("\n", "<br />")
-      bold_open='<b>'
-      bold_close='</b>'
-      body_msg = body_msg.replace(us.color.BOLD, bold_open)
-      body_msg = body_msg.replace(us.color.END, bold_close)
-
-
-    #send actual mail in html oder plain text 
-    if email_on == 1:
-      us.send_mail(to_addrs, subject, body_msg, pwd_mail, text_format)
-    else:
-      print(body_msg)
+  body_msg += '\nBeste Gruesse,'
+  body_msg += '\nLukas'
   
+  #converts \n into html code
+  if text_format == 'html':
+    body_msg = body_msg.replace("\n", "<br />")
+    bold_open='<b>'
+    bold_close='</b>'
+    body_msg = body_msg.replace(us.color.BOLD, bold_open)
+    body_msg = body_msg.replace(us.color.END, bold_close)
+
+
+  #send actual mail in html oder plain text 
+  if email_on == 1:
+    us.send_mail(to_addrs, subject, body_msg, pwd_mail, text_format)
+  else:
+    print(body_msg)
+    #print(ws.current_weather(city_dict['Noordwijk']))
+
 

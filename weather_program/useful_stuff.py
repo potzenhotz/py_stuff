@@ -38,6 +38,16 @@ def send_mail(to_addr, subject, body,password, text_format):
   server.sendmail(from_addr, to_addr, msg_final)
   server.quit()
 
+def week_number():
+  import datetime as dt
+  
+  today = dt.datetime.today()
+  year = dt.datetime.date(today).isocalendar()[0]
+  week_number = dt.datetime.date(today).isocalendar()[1]
+  day_of_week = dt.datetime.date(today).isocalendar()[2]
+
+  return week_number
+
 class color:
    PURPLE = '\033[95m'
    CYAN = '\033[96m'
