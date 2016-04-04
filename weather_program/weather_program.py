@@ -74,7 +74,7 @@ users = ['Lukas'
         ]
 #users = ['Lukas', 'LukasWork', 'Alex']
 #users = ['Lukas', 'LukasWork']
-#users = ['Lukas']
+users = ['Lukas']
 
 for user in users:
  
@@ -92,9 +92,11 @@ for user in users:
   to_addrs  = email_dict[user]
 
   #setup the content of the email 
-
+  
+  #---------------------------------------------------------------------
   #test_flag is email_on=0
-  email_on=1
+  email_on=0
+  #---------------------------------------------------------------------
 
   #format of email
   if email_on == 1:
@@ -104,34 +106,41 @@ for user in users:
   subject = 'Wetterbericht fuer ' + str(user) + ' [PROTOTYP]'
 
   #body of email with error handling
-  retries = 4
-  for i in range(retries):
-    try:
+  if email_on == 0:
+  #no error handling for testing
+    for cities_var in user_cities[user]:
       body_msg = 'Einen schoenen guten Morgen, %s!' % (str(user))
-      body_msg += '\nDiese Staedte hast du abonniert:'
-      for cities_var in user_cities[user]:
-        body_msg += str(ws.current_weather(city_dict[cities_var]))
-        body_msg += '\n'
-    except OSError as err:
-      print("OS error: {0}".format(err))
-      raise
-    except ValueError:
-      print("%%%Value Error.%%%")
-      raise
-    except KeyError:
-      print("%%%City name error.%%%", sys.exc_info())
-      raise
-    except:
-      #for what ever reason it fails sometimes 
-      #we will try 3 times
-      if i < retries-1:
-        time.sleep(5) # delays for 5 seconds
-        continue
-      elif i ==  retries-1:
-        print('Es wurden %s Versuche unternommen!' %(i))
-        print("Unexpected error:", sys.exc_info()[0])
+      body_msg += str(ws.current_weather(city_dict[cities_var]))
+      body_msg += '\n'
+  else:
+    retries = 4
+    for i in range(retries):
+      try:
+        body_msg = 'Einen schoenen guten Morgen, %s!' % (str(user))
+        body_msg += '\nDiese Staedte hast du abonniert:'
+        for cities_var in user_cities[user]:
+          body_msg += str(ws.current_weather(city_dict[cities_var]))
+          body_msg += '\n'
+      except OSError as err:
+        print("OS error: {0}".format(err))
         raise
-    break
+      except ValueError:
+        print("%%%Value Error.%%%")
+        raise
+      except KeyError:
+        print("%%%City name error.%%%", sys.exc_info())
+        raise
+      except:
+        #for what ever reason it fails sometimes 
+        #we will try 3 times
+        if i < retries-1:
+          time.sleep(5) # delays for 5 seconds
+          continue
+        elif i ==  retries-1:
+          print('Es wurden %s Versuche unternommen!' %(i))
+          print("Unexpected error:", sys.exc_info()[0])
+          raise
+      break
 
   body_msg += '\nBeste Gruesse,'
   body_msg += '\nLukas'
