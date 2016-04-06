@@ -57,7 +57,7 @@ def current_weather(input_city):
   obs = owm.weather_at_place(input_city)
   #forecast objects
   fc_object_3h = owm.three_hours_forecast(input_city)  
-  fc_object_daily = owm.daily_forecast(input_city, limit=3)  
+  fc_object_daily = owm.daily_forecast(input_city)  
   
   time_of_obs_unix = obs.get_reception_time()
   time_of_obs =  change_time_format(time_of_obs_unix)
@@ -245,7 +245,7 @@ def current_weather(input_city):
             seven_days_fc += '\n'+'-----------------------------------------------------------------'
 
     #test=fc_object_daily.when_starts('iso')
-
+    #print(owm.weather_history_at_place('London, uk'))
     #-----------------------------------------------------------------------
     #Create output for message
     #-----------------------------------------------------------------------
