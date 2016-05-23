@@ -19,17 +19,22 @@ import plot_function as pf
 #-----------------------------------------------------------------------
 #Parameters
 #-----------------------------------------------------------------------
+print('Parameter values')
 par_reload_data = True
 par_reload_data = False
+print('Reload data:', par_reload_data)
 
 par_price_norm = True
 par_price_norm = False
+print('Normalized data:', par_price_norm)
 
 par_recalc_regression = True
 #par_recalc_regression = False
+print('Recalc regression data:', par_recalc_regression)
 
 par_plot = True
 #par_plot = False
+print('Plot Data:', par_plot)
 
 if par_plot:
     par_save_plot_top10 = True
@@ -44,10 +49,13 @@ if par_plot:
 
 par_start_time = 2013
 #par_start_time = 2015
+print('Start time:', par_start_time)
 
 par_nasdaq = True
 #par_nasdaq = False
 
+print('--------------------------------')
+#sys.exit("Stoped here")
 #-----------------------------------------------------------------------
 #Define to be loaded stocks
 #-----------------------------------------------------------------------
@@ -57,6 +65,7 @@ raw_ticker_list  = pd.read_csv('/Users/Potzenhotz/python/finance/nasdaqlisted.cs
 
 ticker_list = pd.DataFrame(raw_ticker_list)
 
+print('--------------------------------')
 #-----------------------------------------------------------------------
 #Reload or read data for stocks
 #-----------------------------------------------------------------------
@@ -75,6 +84,7 @@ elif (par_start_time == 2015):
     price = price_nasdaq_2015
     start = start_2015
 
+print('--------------------------------')
 #-----------------------------------------------------------------------
 #Data cleansing
 #-----------------------------------------------------------------------
@@ -88,6 +98,7 @@ for stocks in n_stock_x:
 #Reset Stocks
 n_stock_x = price.columns[1::]#first index has Date
 
+print('--------------------------------')
 #-----------------------------------------------------------------------
 #Data analytics
 #-----------------------------------------------------------------------
@@ -151,6 +162,7 @@ m = regr_df.ix[good_stock].slope
 b = regr_df.ix[good_stock].intercept
 x_ff = price.index
 #sys.exit("Stoped here")
+print('--------------------------------')
 #-----------------------------------------------------------------------
 #Plotting
 #-----------------------------------------------------------------------
@@ -177,9 +189,7 @@ if par_plot:
          
 
 
-#title = 'TSLA'
-#pf.plot_func(price['Date'],price['TSLA'], title)
-
+print('--------------------------------')
 #-----------------------------------------------------------------------
 #Status
 #-----------------------------------------------------------------------

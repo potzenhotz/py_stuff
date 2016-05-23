@@ -54,8 +54,8 @@ def stocks_kpi(stock_vector):
         , stocks_obj.get_short_ratio()
         ]
         kpi_df.loc[stocks_name] = all_data
-    print(kpi_df)
 
+    return kpi_df
 test = ['GOOG','GLID', 'IBB', 'AMZN']
 
-stocks_kpi(test)
+tests = stocks_kpi(test)
