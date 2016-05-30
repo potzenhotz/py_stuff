@@ -1,0 +1,11 @@
+        self.com_data_allstock_df = pandas.DataFrame()
+        
+        for stock in self.stock_list:
+            try:
+                print 'Processing stock:', stock
+                self.set_target_stock_url(stock)
+                self.get_com_data()
+                self.downloading_csv()
+                self.process_dataset()
+            except:
+                print 'Problem with stock: ', stock
