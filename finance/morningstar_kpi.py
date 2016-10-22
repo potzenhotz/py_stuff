@@ -2,7 +2,7 @@
     Morning star finance stats scraping.
     Retrieve the information based on the export to csv button in morning star finance web page.
 
-    Most parts used from spidezad:
+    partly used from spidezad:
     https://github.com/spidezad/MorningStar_stock_finance_stat_scraping/blob/master/MorningStar_stock_finance_stat_scraping.py
 """
 
@@ -78,6 +78,10 @@ class MS_StatsExtract(object):
         self.read_df = pd.read_csv(fname, index_col=0)
 
     def read_stock_list(self, stock_fname, delimiter):
+        '''
+        reads stock list using csv format
+        ->stock_fname needs to provide location if file is not in the same folder
+        '''
         self.stock_fname = stock_fname
         raw_ticker_list = pd.read_csv(stock_fname, sep=delimiter, encoding='cp1252') 
         #some kind of windows encoding cp1252. Excel is creating it...
@@ -93,7 +97,11 @@ class MS_StatsExtract(object):
  
     
     def read_raw_df(self):
-        '''Read dataframe from csv file'''
+        '''
+        Read dataframe from csv file
+        -> TO DO: only use read_df funcktion
+        here: still hardcoded path
+        '''
         if self.__print_info: print ('Info: Entering read_RAW_df')
 
         fname = (self.dir_raw_data + 'raw_df_' + str(self.stock_portion_url) + '.csv')
@@ -102,49 +110,12 @@ class MS_StatsExtract(object):
         self.raw_df = pd.read_csv(fname, index_col = 0)
         if self.__print_test: print ('Test:', self.raw_df)
 
-    def extract_analysis_opinion(self):
-        import urllib.request as urllib
-        import bs4
-        import html2text
-        
-        ao_start_url ='https://de.finance.yahoo.com/q/ao?s='
-        if self.country == 'ger':
-            ao_portion_url = self.stock + '.DE'
-        elif self.country == 'us':
-            ao_portion_url = self.stock
-        elif self.country == 'uk':
-            ao_portion_url = self.stock + '.L'
-        ao_url= ao_start_url + ao_portion_url
-        beautiful = urllib.urlopen(ao_url).read()
-
-        soup = bs4.BeautifulSoup(beautiful, 'lxml')
-        '''
-        with open('out.txt', 'w') as f:
-            f.write(soup.prettify())
-        '''
-        
-        txt = html2text.html2text(soup.get_text())
-        str1 = "Empfehlung (diese Woche):";
-        str2 = "Empfehlung (letzte Woche):";
-        len_val = 3
-        self.str1_and_value = txt[txt.find(str1):txt.find(str1) + len(str1) + len_val]
-        self.recommendation_this_week = txt[txt.find(str1)+ len(str1):txt.find(str1) + len(str1) + len_val]
-        self.str2_and_value = txt[txt.find(str2):txt.find(str2) + len(str2) + len_val]
-        self.recommendation_last_week = txt[txt.find(str2)+ len(str1):txt.find(str2) + len(str2) + len_val]
-
-        if self.recommendation_this_week.replace(',','').isdigit() == True:
-            self.recommendation_this_week = self.recommendation_this_week
-        else:    
-            self.recommendation_this_week = 'NaN'
-
-        self.recommendation_this_week = self.recommendation_this_week.replace(',','.')
-        '''
-        buy is 1, hold is2, sell is mark 3
-        '''
-
 
     def check_data_exist(self):
-        '''Check if data file already exists'''
+        '''
+        Check if data file already exists
+        -TO DO: still with hardcoded path
+        '''
         if self.__print_info: print ('Info: Entering check_data_exist')
 
         fname = (self.dir_raw_data + 'raw_df_'  + str(self.stock_portion_url) + '.csv')
@@ -152,13 +123,27 @@ class MS_StatsExtract(object):
         if self.__print_info: print ('Info: File existance of', self.stock_portion_url,'is:', self.data_exist)
         '''Check if file older than 3 month'''
         if self.data_exist == True:
-            self.file_older_3_month = time.time() - os.path.getmtime(fname) > (6 * 24 * 60 * 60)
-            if self.file_older_3_month == True:
-                self.data_exist = False
-            if self.__print_info: print ('Info: File age in h:', (time.time() - os.path.getmtime(fname))/60/60/24)
+            self.check_age_of_file()
+            #self.file_older_3_month = time.time() - os.path.getmtime(fname) > (6 * 24 * 60 * 60)
+            #if self.file_older_3_month == True:
+            #    self.data_exist = False
+            #if self.__print_info: print ('Info: File age in h:', (time.time() - os.path.getmtime(fname))/60/60/24)
+
+    def check_age_of_file(self):
+        '''
+        checks age of file and compares it to certain age
+        -TO DO: still hardcoded file age comparison
+        '''
+        self.file_older_3_month = time.time() - os.path.getmtime(fname) > (6 * 24 * 60 * 60)
+        if self.file_older_3_month == True:
+            self.data_exist = False
+        if self.__print_info: print ('Info: File age in h:', (time.time() - os.path.getmtime(fname))/60/60/24)
 
     def download_data(self):
-        '''Download the data using panda'''
+        '''
+        Download the data using panda
+        -uses read_csv to download morningstar data
+        '''
         if self.__print_info: print ('Info: Entering download_data')
 
         self.download_fault = 0
@@ -183,6 +168,7 @@ class MS_StatsExtract(object):
         else:
             self.read_raw_df()
         
+        #get yahoo stock values 
         self.get_stock_values()
 
         
@@ -212,7 +198,7 @@ class MS_StatsExtract(object):
             self.stock_week = web.get_data_yahoo(self.stock_yahoo, last_week, end )
             self.stock_6_months_ago = web.get_data_yahoo(self.stock_yahoo,six_months_start, six_months )
             self.stock_12_months_ago = web.get_data_yahoo(self.stock_yahoo, twelve_months_start, twelve_months)
-
+            
             self.stock_avg_week = self.stock_week['Adj Close'].mean() 
             self.stock_avg_6_months = self.stock_6_months_ago['Adj Close'].mean() 
             self.stock_avg_12_months = self.stock_12_months_ago['Adj Close'].mean() 
@@ -294,9 +280,59 @@ class MS_StatsExtract(object):
         self.df_full = pd.concat(self.frames)
         if self.__print_test: print(self.df_full)
 
+    def extract_analysis_opinion(self):
+        '''
+        single function to extract analysis opinon for stocks
+        -simple webcrawler gets html content of homepage (yahoo)
+        -html is decoded to plain text 
+        -plain text is searched for ceratin string
+        '''
+        import urllib.request as urllib
+        import bs4
+        import html2text
+        
+        ao_start_url ='https://de.finance.yahoo.com/q/ao?s='
+        if self.country == 'ger':
+            ao_portion_url = self.stock + '.DE'
+        elif self.country == 'us':
+            ao_portion_url = self.stock
+        elif self.country == 'uk':
+            ao_portion_url = self.stock + '.L'
+        ao_url= ao_start_url + ao_portion_url
+        beautiful = urllib.urlopen(ao_url).read()
+
+        soup = bs4.BeautifulSoup(beautiful, 'lxml')
+        '''
+        with open('out.txt', 'w') as f:
+            f.write(soup.prettify())
+        '''
+        
+        txt = html2text.html2text(soup.get_text())
+        str1 = "Empfehlung (diese Woche):";
+        str2 = "Empfehlung (letzte Woche):";
+        len_val = 3
+        self.str1_and_value = txt[txt.find(str1):txt.find(str1) + len(str1) + len_val]
+        self.recommendation_this_week = txt[txt.find(str1)+ len(str1):txt.find(str1) + len(str1) + len_val]
+        self.str2_and_value = txt[txt.find(str2):txt.find(str2) + len(str2) + len_val]
+        self.recommendation_last_week = txt[txt.find(str2)+ len(str1):txt.find(str2) + len(str2) + len_val]
+
+        if self.recommendation_this_week.replace(',','').isdigit() == True:
+            self.recommendation_this_week = self.recommendation_this_week
+        else:    
+            self.recommendation_this_week = 'NaN'
+
+        self.recommendation_this_week = self.recommendation_this_week.replace(',','.')
+        '''
+        buy is 1, hold is2, sell is mark 3
+        '''
+
+
 
     def plot_data(self,df):
-        '''Plot some KPIs'''
+        '''
+        Plot some KPIs
+        -> still under construction
+        '''
         if self.__print_info: print ('Info: Entering plot_data')
         #df = df.transpose()
         df = df.astype(float)
@@ -315,7 +351,9 @@ class MS_StatsExtract(object):
         plt.close()
 
     def get_data_for_all_stocks(self):
-        '''All steps to get the data'''
+        '''
+        All steps to get the data
+        '''
         if self.__print_info: print ('Info: Entering get_data_for_all_stocks')
 
         self.counter_extract = 0
@@ -361,8 +399,10 @@ class MS_StatsExtract(object):
                                 , 'EPS'
                                 , 'Dividends'
                                 , 'Book_value'
+                                , 'Stock_avg_week'
                                 ) )
             f.close()
+
 
         raw_EPS = self.df_full.iloc[5]
         raw_Dividends = self.df_full.iloc[6]
@@ -416,9 +456,16 @@ class MS_StatsExtract(object):
                             , raw_EPS.TTM
                             , raw_Dividends.TTM
                             , raw_Book_value
+                            , self.stock_avg_week
                             ) )
         f.close()
         
+        #df_test = pd.DataFrame({ 'Symbol' : [self.stock]
+        #                        ,'RoE' : [self.RoE]
+        #                        })
+        #print('hier bin ich') 
+        #fname = self.dir_raw_data + 'test' + str(self.stock_portion_url) + '.csv'
+        #self.write_df(self.df_test,fname)
         '''
         to do:
         -perfomance accoding to quartalszahlen
@@ -541,11 +588,14 @@ class MS_StatsExtract(object):
 
         self.P_three_m_reversal = 0
 
-        self.P_Profit_growth = self.Profit_growth 
         if float(self.Profit_growth) > 0.05:
+            self.P_Profit_growth = 1
             self.P_Sum += 1
         elif float(self.Profit_growth) < -0.05:
+            self.P_Profit_growth = -1
             self.P_Sum -= 1
+        else:
+            self.P_Profit_growth = 0
  
 
         f = open(self.fname_kpi_analyze, 'a', newline='')
@@ -592,15 +642,15 @@ if __name__ == '__main__':
     '''
     If python program is not called inside another python program
     '''
-    #which_stock_list = 'Test_us'
+    which_stock_list = 'Test_us'
     #which_stock_list = 'Test_ger'
-    #which_stock_list = 'DAX'
+    which_stock_list = 'DAX'
     #which_stock_list = 'MDAX'
     #which_stock_list = 'SDAX'
     #which_stock_list = 'TECDAX'
     #which_stock_list = 'NDX100'
     #which_stock_list = 'SP500'
-    which_stock_list = 'FTSE100'
+    #which_stock_list = 'FTSE100'
     
 
 
@@ -609,6 +659,7 @@ if __name__ == '__main__':
         theme = 'TEST_US'
         us_stock_list = ['AMZN', 'GILD' ]
         us_stock_list = ['GILD' ]
+        us_stock_list = ['SYMC' ]
         stocks = MS_StatsExtract(country, theme)
         stocks.set_stocklist(us_stock_list)
         stocks.get_data_for_all_stocks()
