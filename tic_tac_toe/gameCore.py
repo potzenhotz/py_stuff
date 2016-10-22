@@ -17,46 +17,53 @@ class gameCore(object):
     def __init__(self):
         player1 = 1
         player2 = 2
-        self.field = {
-                1: 0, 2: 0, 3: 0,
-                4: 0, 5: 0, 6: 0,
-                7: 0, 8: 0, 9: 0 
-                }
+        self.hashBase = 3
+        self.field = (
+                0, 0, 0,
+                0, 0, 0,
+                0, 0, 0 
+                )
         
-        self.hashField = {
-                1: 2**0, 2: 2**1, 3: 2**2,
-                4: 2**3, 5: 2**4, 6: 2**5,
-                7: 2**6, 8: 2**7, 9: 2**8,
-                }
 
         self.winningCombination = [
-                [1,2,3],
-                [4,5,6],
-                [7,8,9],
+                [0,1,2],
+                [3,4,5],
+                [6,7,8],
+                [0,3,6],
                 [1,4,7],
                 [2,5,8],
-                [3,6,9],
-                [1,5,9],
-                [3,5,7]
+                [0,4,8],
+                [2,4,6]
                 ]
 
-        #here should be a reference to winningCombination
-        #need to think of a good loop 
-        self.winningHashValues = [
-                self.hashField[1] + self.hashField[2] + self.hashField[3],
-                self.hashField[4] + self.hashField[5] + self.hashField[6],
-                self.hashField[7] + self.hashField[8] + self.hashField[9],
-                self.hashField[1] + self.hashField[4] + self.hashField[7],
-                self.hashField[2] + self.hashField[5] + self.hashField[8],
-                self.hashField[3] + self.hashField[6] + self.hashField[9],
-                self.hashField[1] + self.hashField[5] + self.hashField[9],
-                self.hashField[3] + self.hashField[5] + self.hashField[7],
-                ]
+    def createHashValue(self, field):
+        hashValue = hash(field) 
+        return hashValue
 
+
+    def decryptHashValue(self, hashValue):
+
+        hashValue
+    def createHashWinningValues(self):
+        for i in range(len(self.winningCombination)):
+            self.winningHashValues = [
+                    createHashValue(0,self.winningCombination[i][0])
+                    + createHashValue(0,self.winningCombination[i][1])
+                    + createHashValue(0,self.winningCombination[i][2])
+                    ]
+
+
+        """        
+        self.hashField = {
+                1: 3**0, 2: 3**1, 3: 3**2,
+                4: 3**3, 5: 3**4, 6: 3**5,
+                7: 3**6, 8: 3**7, 9: 3**8,
+                }
+        """
 
     def showField(self):
-        self.showField = self.field.copy()
-        for key, values in sorted(self.showField.items()):
+        self.showField = self.field
+        for key in self.showField):
             if values == 0:
                 self.showField[key] = '#'
             elif values == 1:
