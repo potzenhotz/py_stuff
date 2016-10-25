@@ -5,7 +5,6 @@ import gameCore as gc
 game1 = gc.gameCore()
 
 
-#game1.showField()
 
 #if game1.isValidMove(2):
 #    pass
@@ -22,4 +21,5 @@ game1 = gc.gameCore()
 #print('move3')
 #game1.setMove(3,1)
 
-print(game1.createHashValue(game1.field))
+#game1.createHashWinningValues()
+game1.showField()
