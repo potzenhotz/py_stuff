@@ -1,6 +1,6 @@
 #!/bin/env python3
 ########################################################################
-# Job of the game field:
+#a Job of the game field:
 # -Set field
 # -showField
 # -setMove
