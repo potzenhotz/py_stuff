@@ -12,6 +12,8 @@
 # -
 ########################################################################
 
+import random 
+
 class gameCore(object):
 
     def __init__(self):
@@ -119,6 +121,9 @@ class gameCore(object):
     def raiseFieldIsDuplicated(self, position):
         print('Move is not valid ', position)
 
+    def whoGoesFirst(self):
+        self.firstPlayer = random.randint(1,2)
+        return self.firstPlayer
 
 
 
