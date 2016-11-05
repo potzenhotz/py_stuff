@@ -7,27 +7,31 @@ import random
 
 
 class RandomPlayer(object):
+    '''This player makes random moves'''
 
     def __init__(self, player, game):
-        self.set_player(player)
+        self.player = player
         self.game = game
-
-    def set_player(self, player):
-        self.Player = player
+        self.field = []
+        self.possible_moves = []
 
     def make_move(self, game, position):
-        game.setMove(position, self.Player)
+        '''make a move TODO: should be inherited'''
+        game.set_move(position, self.player)
 
-    def getField(self, game):
+    def get_field(self, game):
+        '''ask the game_core for the field'''
         self.field = game.field[:]
 
-    def calcPossibleMoves(self):
-        self.getField(self.game)
-        self.possibleMoves = [
+    def calc_possible_moves(self):
+        '''determine free tiles'''
+        self.get_field(self.game)
+        self.possible_moves = [
             idx for idx, value in enumerate(self.field) if value == 0
             ]
 
-    def makeRandomMove(self):
-        self.calcPossibleMoves()
-        randomMove = random.choice(self.possibleMoves)
-        self.make_move(self.game, randomMove)
+    def make_random_move(self):
+        '''set a random move on a valid field'''
+        self.calc_possible_moves()
+        random_move = random.choice(self.possible_moves)
+        self.make_move(self.game, random_move)

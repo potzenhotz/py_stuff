@@ -50,33 +50,6 @@ class GameCore(object):
             [2, 4, 6]
         ]
 
-    @staticmethod
-    def create_hash_value(field):
-        '''use python internal hash algorithm'''
-        hash_value = hash(tuple(field))
-        return hash_value
-
-    def create_hash_winning_values(self):
-        """translate winning values into hash value"""
-        for player_counter in range(1, 3):
-            for row_x in range(len(self.winning_combination)):
-                self.change_tile_status(
-                    self.winning_combination[row_x][0], player_counter
-                    )
-                self.change_tile_status(
-                    self.winning_combination[row_x][1], player_counter
-                    )
-                self.change_tile_status(
-                    self.winning_combination[row_x][2], player_counter
-                    )
-
-                buffer_hash_value = self.create_hash_value(self.field)
-                self.winning_hash_values.append(buffer_hash_value)
-                if player_counter == 1:
-                    self.winning_hash_values_p1.append(buffer_hash_value)
-                elif player_counter == 2:
-                    self.winning_hash_values_p2.append(buffer_hash_value)
-
     def show_field(self):
         """displays the field to the prompt"""
         buffer_show_field = self.field[:]
@@ -101,7 +74,9 @@ class GameCore(object):
 
     def is_valid_move(self, position):
         """check if move is in range of field"""
-        if position in [0, 1, 2, 3, 4, 5, 6, 7, 8]:
+        if self.eval_field():
+            return False
+        elif position in [0, 1, 2, 3, 4, 5, 6, 7, 8]:
             if self.field[position] == 0:
                 return True
         return False
@@ -120,14 +95,15 @@ class GameCore(object):
         self.field[position] = player
 
     def eval_field(self):
-        '''evaluate field for a winner'''
-        current_hash_field = self.create_hash_value(self.field)
-        if current_hash_field in self.winning_hash_values_p1:
-            self.winner = 1
-            return True
-        elif current_hash_field in self.winning_hash_values_p2:
-            self.winner = 2
-            return True
+        '''check if a player has won'''
+        for i in range(1, 3):
+            for row_x in self.winning_combination:
+                if self.field[self.winning_combination[row_x][0]] == i \
+                and self.field[self.winning_combination[row_x][1]] == i \
+                and self.field[self.winning_combination[row_x][2]] == i:
+                    self.winner = i
+                    return True
+        return False
 
     def raise_field_is_duplicated(self, position):
         '''TODO: write propper error code'''
