@@ -20,14 +20,14 @@ class GameCore(object):
 
     def __init__(self):
         self.field = []
-        self.winning_hash_values = []
-        self.winning_hash_values_p1 = []
-        self.winning_hash_values_p2 = []
+        #self.winning_hash_values = []
+        #self.winning_hash_values_p1 = []
+        #self.winning_hash_values_p2 = []
         self.winner = None
 
         self.reset_field()
         self.create_winning_combination()
-        self.create_hash_winning_values()
+        #self.create_hash_winning_values()
 
     def reset_field(self):
         """resets the field"""
@@ -85,8 +85,12 @@ class GameCore(object):
         '''change state of tile in field'''
         if self.is_valid_move(position):
             self.change_tile_status(position, player)
-            if self.eval_field():
+            self.eval_field()
+            if (self.winner == 1 or self.winner == 2):
                 print('Player %s wins.' % self.winner)
+            elif (self.winner == 0):
+                print('Draw!')
+
         else:
             self.raise_field_is_duplicated(position)
 
@@ -98,11 +102,13 @@ class GameCore(object):
         '''check if a player has won'''
         for i in range(1, 3):
             for row_x in self.winning_combination:
-                if self.field[self.winning_combination[row_x][0]] == i \
-                and self.field[self.winning_combination[row_x][1]] == i \
-                and self.field[self.winning_combination[row_x][2]] == i:
+                if self.field[row_x[0]] == i \
+                and self.field[row_x[1]] == i \
+                and self.field[row_x[2]] == i:
                     self.winner = i
                     return True
+        if 0 not in self.field:
+            self.winner = 0
         return False
 
     def raise_field_is_duplicated(self, position):

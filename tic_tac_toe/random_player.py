@@ -3,7 +3,7 @@
 Random player for tic tac toe
 '''
 
-import random
+import numpy as np
 
 
 class RandomPlayer(object):
@@ -33,5 +33,6 @@ class RandomPlayer(object):
     def make_random_move(self):
         '''set a random move on a valid field'''
         self.calc_possible_moves()
-        random_move = random.choice(self.possible_moves)
+        print(self.possible_moves)
+        random_move = np.random.choice(self.possible_moves)
         self.make_move(self.game, random_move)
