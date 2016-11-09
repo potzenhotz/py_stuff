@@ -13,6 +13,8 @@
 ########################################################################
 
 import random
+import numpy as np
+import pandas as pd
 
 
 class GameCore(object):
@@ -102,9 +104,9 @@ class GameCore(object):
         '''check if a player has won'''
         for i in range(1, 3):
             for row_x in self.winning_combination:
-                if self.field[row_x[0]] == i \
-                and self.field[row_x[1]] == i \
-                and self.field[row_x[2]] == i:
+                if (self.field[row_x[0]] == i and
+                        self.field[row_x[1]] == i and
+                        self.field[row_x[2]] == i):
                     self.winner = i
                     return True
         if 0 not in self.field:
@@ -119,3 +121,14 @@ class GameCore(object):
         '''random decision who goes first'''
         first_player = random.randint(1, 2)
         return first_player
+
+    def create_hash_value(field):
+        '''use python internal hash algorithm'''
+        hash_value = hash(tuple(field))
+        return hash_value
+    """
+    def create_hash_table(self):
+        '''create the table for hash translation'''
+
+    def inser_into_hash_table():
+    """    
