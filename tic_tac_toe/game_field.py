@@ -122,13 +122,56 @@ class GameCore(object):
         first_player = random.randint(1, 2)
         return first_player
 
-    def create_hash_value(field):
+    def create_hash_value(self):
         '''use python internal hash algorithm'''
-        hash_value = hash(tuple(field))
+        hash_value = hash(tuple(self.field))
         return hash_value
     """
     def create_hash_table(self):
         '''create the table for hash translation'''
+        self.hash_table = pd.DataFrame({ 'Field' : [],
+                                    'Hash Value' : []
+            })
 
-    def inser_into_hash_table():
-    """    
+    def insert_into_hash_table(self):
+        '''insert into hash_table'''
+        hash_value=self.create_hash_value()
+        self.hash_table=self.hash_table.append({
+            'Field':self.field,
+            'Hash Value':hash_value},
+            ignore_index=True
+            )
+    """
+
+class GameReferee(object):
+    """This is the guy who tells everybody what to do"""
+
+    def __init__(self, game_field, stat_location):
+        self.game_field = game_field
+        self.stat_location = stat_location
+
+    def play_game(self):
+        ''' Do all the stuff to play a full game cycle'''
+        pass
+
+    def create_game_history(self):
+        '''create pandas dataframe which keeps track of the games'''
+        self.df_game_history = pd.DataFrame({
+            'Game': [],
+            'Field': [],
+            'Winner': []
+            })
+
+    def load_game_history(self):
+        '''loads existing game history from csv'''
+        pass
+
+    def save_game_history(self):
+        '''save dataframe to csv file'''
+        pass
+
+    def insert_into_game_history(self):
+        '''add new row to dataframe'''
+        pass
+
+

@@ -8,30 +8,32 @@ import numpy as np
 class Player(object):
     '''parent class for player'''
 
-    def __init__(self, player, game):
+    def __init__(self, player, game_field):
         self.player = player
-        self.game = game
+        self.game_field = game_field
+        self.field = []
+        self.possible_moves = []
 
-    def make_move(self, game, position):
+    def make_move(self, position):
         '''make a move TODO: should be inherited'''
-        game.set_move(position, self.player)
+        self.game_field.set_move(position, self.player)
 
-    def get_field(self, game):
+    def get_field(self):
         '''ask the game_core for the field'''
-        self.field = game.field[:]
+        self.field = self.game_field.field[:]
 
     def calc_possible_moves(self):
         '''determine free tiles'''
-        self.get_field(self.game)
+        self.get_field()
         self.possible_moves = [
             idx for idx, value in enumerate(self.field) if value == 0
             ]
 
-class AI_Player(Player):
+class AIPlayer(Player):
     '''machine learning algorithm for tic tac toe'''
 
-    def __init__(self, player, game):
-        Player.__init__(self,player,game)
+    def __init__(self, player, game_field):
+        Player.__init__(self, player, game_field)
         self.field = []
         self.possible_moves = []
 
@@ -41,8 +43,8 @@ class AI_Player(Player):
 class RandomPlayer(Player):
     '''This player makes random moves'''
 
-    def __init__(self, player, game):
-        Player.__init__(self,player,game)
+    def __init__(self, player, game_field):
+        Player.__init__(self, player, game_field)
         self.field = []
         self.possible_moves = []
 
@@ -50,4 +52,4 @@ class RandomPlayer(Player):
         '''set a random move on a valid field'''
         self.calc_possible_moves()
         random_move = np.random.choice(self.possible_moves)
-        self.make_move(self.game, random_move)
+        self.make_move(random_move)

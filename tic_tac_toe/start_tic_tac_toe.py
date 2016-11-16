@@ -3,11 +3,18 @@
 '''
 testing
 '''
-import game_core as gc
+import game_field as gf
 import player as p
 
-Game1 = gc.GameCore()
+GAMEFIELD = gf.GameCore()
+REFEREE = gf.GameReferee(GAMEFIELD)
 
+RNDPLAYER1 = p.RandomPlayer(1, GAMEFIELD)
+
+REFEREE.create_game_history()
+
+print(REFEREE.game_history)
+"""#Unit test 1 maybee
 RndPlayer1 = p.RandomPlayer(1, Game1)
 RndPlayer2 = p.RandomPlayer(2, Game1)
 
@@ -18,6 +25,7 @@ while Game1.winner is None:
 
 Game1.show_field()
 print(Game1.winner)
+"""
 
 '''
 unit_test = ut.unit_test_ttt()
