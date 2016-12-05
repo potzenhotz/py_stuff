@@ -13,6 +13,8 @@
 ########################################################################
 
 import random
+import numpy as np
+import pandas as pd
 
 
 class GameCore(object):
@@ -20,14 +22,14 @@ class GameCore(object):
 
     def __init__(self):
         self.field = []
-        self.winning_hash_values = []
-        self.winning_hash_values_p1 = []
-        self.winning_hash_values_p2 = []
+        #self.winning_hash_values = []
+        #self.winning_hash_values_p1 = []
+        #self.winning_hash_values_p2 = []
         self.winner = None
 
         self.reset_field()
         self.create_winning_combination()
-        self.create_hash_winning_values()
+        #self.create_hash_winning_values()
 
     def reset_field(self):
         """resets the field"""
@@ -85,8 +87,12 @@ class GameCore(object):
         '''change state of tile in field'''
         if self.is_valid_move(position):
             self.change_tile_status(position, player)
-            if self.eval_field():
+            self.eval_field()
+            if (self.winner == 1 or self.winner == 2):
                 print('Player %s wins.' % self.winner)
+            elif (self.winner == 0):
+                print('Draw!')
+
         else:
             self.raise_field_is_duplicated(position)
 
@@ -98,11 +104,13 @@ class GameCore(object):
         '''check if a player has won'''
         for i in range(1, 3):
             for row_x in self.winning_combination:
-                if self.field[self.winning_combination[row_x][0]] == i \
-                and self.field[self.winning_combination[row_x][1]] == i \
-                and self.field[self.winning_combination[row_x][2]] == i:
+                if (self.field[row_x[0]] == i and
+                        self.field[row_x[1]] == i and
+                        self.field[row_x[2]] == i):
                     self.winner = i
                     return True
+        if 0 not in self.field:
+            self.winner = 0
         return False
 
     def raise_field_is_duplicated(self, position):
@@ -113,3 +121,57 @@ class GameCore(object):
         '''random decision who goes first'''
         first_player = random.randint(1, 2)
         return first_player
+
+    def create_hash_value(self):
+        '''use python internal hash algorithm'''
+        hash_value = hash(tuple(self.field))
+        return hash_value
+    """
+    def create_hash_table(self):
+        '''create the table for hash translation'''
+        self.hash_table = pd.DataFrame({ 'Field' : [],
+                                    'Hash Value' : []
+            })
+
+    def insert_into_hash_table(self):
+        '''insert into hash_table'''
+        hash_value=self.create_hash_value()
+        self.hash_table=self.hash_table.append({
+            'Field':self.field,
+            'Hash Value':hash_value},
+            ignore_index=True
+            )
+    """
+
+class GameReferee(object):
+    """This is the guy who tells everybody what to do"""
+
+    def __init__(self, game_field, stat_location):
+        self.game_field = game_field
+        self.stat_location = stat_location
+
+    def play_game(self):
+        ''' Do all the stuff to play a full game cycle'''
+        pass
+
+    def create_game_history(self):
+        '''create pandas dataframe which keeps track of the games'''
+        self.df_game_history = pd.DataFrame({
+            'Game': [],
+            'Field': [],
+            'Winner': []
+            })
+
+    def load_game_history(self):
+        '''loads existing game history from csv'''
+        pass
+
+    def save_game_history(self):
+        '''save dataframe to csv file'''
+        pass
+
+    def insert_into_game_history(self):
+        '''add new row to dataframe'''
+        pass
+
+
