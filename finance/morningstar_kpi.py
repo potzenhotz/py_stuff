@@ -379,7 +379,9 @@ class MS_StatsExtract(object):
         
         if self.counter_extract == 0:
             #create files
-            self.fname_kpi_collection = self.dir_data + theme + '_'+'kpi_collection.csv'
+            timestr = time.strftime("%Y%m%d")
+            file_name_end = '_raw_kpi_' + timestr + '.csv'
+            self.fname_kpi_collection = self.dir_data + theme + file_name_end
             f = open(self.fname_kpi_collection, 'w')
             writer = csv.writer(f)
             writer.writerow( ('Symbol'
@@ -478,7 +480,9 @@ class MS_StatsExtract(object):
 
         if self.counter_extract == 0:
             #create files with header
-            self.fname_kpi_analyze = self.dir_data + theme + '_'+'kpi_analyze.csv'
+            timestr = time.strftime("%Y%m%d")
+            file_name_end = '_analyzed_kpi_' + timestr + '.csv'
+            self.fname_kpi_analyze = self.dir_data + theme + file_name_end 
             f = open(self.fname_kpi_analyze, 'w')
             writer = csv.writer(f)
             writer.writerow( ('Symbol'
@@ -644,8 +648,8 @@ if __name__ == '__main__':
     '''
     which_stock_list = 'Test_us'
     #which_stock_list = 'Test_ger'
-    which_stock_list = 'DAX'
-    #which_stock_list = 'MDAX'
+    #which_stock_list = 'DAX'
+    which_stock_list = 'MDAX'
     #which_stock_list = 'SDAX'
     #which_stock_list = 'TECDAX'
     #which_stock_list = 'NDX100'
