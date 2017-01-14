@@ -1,0 +1,29 @@
+   index Buchungstag        Wert               Umsatzart  \
+0      0  18.07.2016  18.07.2016           Kartenzahlung   
+1      1  18.07.2016  18.07.2016  Auszahlung Geldautomat   
+2      2  19.07.2016  19.07.2016    SEPA-Lastschrift von   
+
+  Begünstigter / Auftraggeber  \
+0                        None   
+1                        None   
+2               congstar GmbH   
+
+                                    Verwendungszweck                    IBAN  \
+0  P+C SAGT DANKE//Dortmund/DE 16-07-2016T10:44:2...                    None   
+1  COMMERZBANK-AG/DORTMUN/DORTMUND/DE 16-07-2016T...                    None   
+2  OTHR Sonst. Transakt Kundennummer 2202731692/R...  DE57590100660166496669   
+
+           BIC Kundenreferenz Mandatsreferenz         Gläubiger ID  \
+0         None           None             None                None   
+1         None           None             None                None   
+2  PBNKDEFFXXX     3988622324       MA10792024  DE30ZZZ00000246391   
+
+  Fremde Gebühren Betrag Abweichender Empfänger Anzahl der Aufträge  \
+0            None   None                   None                None   
+1            None   None                   None                None   
+2            None   None                   None                None   
+
+  Anzahl der Schecks     Soll Haben Währung  
+0               None   -39,95  None     EUR  
+1               None  -200,00  None     EUR  
+2               None   -15,34  None     EUR  
