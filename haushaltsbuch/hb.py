@@ -9,18 +9,18 @@ import sys
 import csv
 import numpy as np
 import hb_functions as hb
-import geopy
+import geopy as geo
 
 #-----------------------------------------------------------------------
 #Define input parameters
 #-----------------------------------------------------------------------
 #input_arguments = sys.argv
 par_load = 'append' #for integration layer
-par_load = 'initial' #for integration layer
+#par_load = 'initial' #for integration layer
 file_path = '/Users/Potzenhotz/data/raw_data/'
-file_name = 'Kontoumsaetze_350_355327800_20170114_175539.csv'
-file_name = 'Kontoumsaetze_350_355327800_20170204_010626.csv'
-file_name = 'Kontoumsaetze_350_355327800_20170211_173521.csv'
+#file_name = 'Kontoumsaetze_350_355327800_20170114_175539.csv'
+#file_name = 'Kontoumsaetze_350_355327800_20170225_000825.csv'
+file_name = 'Kontoumsaetze_350_355327800_20170408_101130.csv'
 file_full = file_path + file_name
 
 #-----------------------------------------------------------------------
@@ -34,8 +34,10 @@ haushaltsbuch_db = create_engine('sqlite:////Users/Potzenhotz/data/database/haus
 raw_df = pd.read_csv(file_full, encoding="ISO-8859-1", sep=';', skiprows=4, skipfooter=1, engine='python')
 
 # Convert to datetimes
-raw_df['Buchungstag'] = pd.to_datetime(raw_df['Buchungstag'], format='%d.%m.%Y')
-raw_df['Wert'] = pd.to_datetime(raw_df['Wert'], format='%d.%m.%Y')
+# UPDATE: Does not work with initial append diff load -> therfore we stay with strings
+#raw_df['Buchungstag'] = pd.to_datetime(raw_df['Buchungstag'], format='%d.%m.%Y')
+#raw_df['Wert'] = pd.to_datetime(raw_df['Wert'], format='%d.%m.%Y')
+
 raw_df.rename(columns={'Wert': 'Wertstellung'}, inplace=True)
 raw_df.rename(columns={'Begünstigter / Auftraggeber': 'BeguenstigterAuftraggeber'}, inplace=True)
 
@@ -59,8 +61,12 @@ raw_df['Haben'] = raw_df['Haben'].astype(float)
 #-----------------------------------------------------------------------
 # STAGING: Load table
 #-----------------------------------------------------------------------
-hb.load_table(raw_df, 'staging_layer', haushaltsbuch_db, 'replace')
-
+if par_load == 'initial':
+    hb.load_table(raw_df, 'staging_layer', haushaltsbuch_db, 'replace')
+elif par_load == 'append':
+    columns = ['Wertstellung', 'Verwendungszweck']
+    load_raw_df = hb.clean_df_db_dups(raw_df, 'staging_layer', haushaltsbuch_db, columns) 
+    hb.load_table(load_raw_df, 'staging_layer', haushaltsbuch_db, 'append')
 
 #-----------------------------------------------------------------------
 # INTEGRATION: Read table
@@ -81,10 +87,13 @@ uebersetzung = {'KREDITKARTE': 'Kreditkarte','Miete Lukas Lübeck': 'Miete'
                 , 'Aktien':'Aktien', 'Akiten':'Aktien'}
 
 staedte = {'KARLSRUHE':'Karlsruhe', 'Dortmund Kley':'Dortmund', 'LUEBECK':'Luebeck'
-        ,'DORTMUND':'Dortmund', 'KASSEL':'Kassel', 'SANDESNEBEN':'Sandesneben'
-        , 'Luebeck':'Luebeck', 'QUARTU SANT':'Cagiliari'}
+        ,'DORTMUND':'Dortmund','Dortmund':'Dortmund', 'KASSEL':'Kassel', 'SANDESNEBEN':'Sandesneben'
+        , 'Luebeck':'Luebeck', 'Lübeck':'Luebeck','QUARTU SANT':'Cagliari', 'VILLASIMIUS':'Cagliari'
+        , 'CAGLIARI':'Cagliari', 'Hamburg':'Hamburg', 'BOCHUM':'Bochum', 'Luxembourg':'Luxembourg'
+        , 'HH-AIRPORT':'Hamburg', 'HAMBURG':'Hamburg', 'GOTEBORG':'Gothenburg', 'HH-SEEBURG':'Hamburg'
+        ,}
 
-raw_il_df['Stadt'] = 'no_data'
+raw_il_df['Stadt'] = None
 raw_il_df['Land'] = 'no_data'
 
 for index, row in raw_il_df.iterrows():
@@ -92,18 +101,19 @@ for index, row in raw_il_df.iterrows():
         raw_il_df.set_value(index,'BeguenstigterAuftraggeber', row['Verwendungszweck'].split('/')[0])
 
     length_verw=len(row['Verwendungszweck'].split('/'))
+    #print(length_verw)
     if length_verw > 2:
         for key, value in staedte.items():
             if row['Verwendungszweck'].split('/')[2].find(key) !=-1:
-                raw_il_df.set_value(index,'Stadte', value)
-            #else:
-            #    raw_il_df.set_value(index,'Ort', row['Verwendungszweck'].split('/')[2])
+                raw_il_df.set_value(index,'Stadt', value)
+                #print(row['Verwendungszweck'].split('/')[2], key, value, index)
+                break
     elif length_verw == 2:
         for key, value in staedte.items():
             if row['Verwendungszweck'].split('/')[1].find(key) !=-1:
                 raw_il_df.set_value(index,'Stadt', value)
-    #        else:
-    #            raw_il_df.set_value(index,'Ort', row['Verwendungszweck'].split('/')[1])
+                #print('###',row['Verwendungszweck'].split('/')[1], key, value, index)
+                break
 
 
     for key, value in uebersetzung.items():
@@ -119,12 +129,7 @@ for index, row in raw_il_df.iterrows():
 #-----------------------------------------------------------------------
 # INTEGRATION: Load table
 #-----------------------------------------------------------------------
-if par_load == 'initial':
-    hb.load_table(raw_il_df, 'integration_layer', haushaltsbuch_db, 'replace')
-elif par_load == 'append':
-    columns = ['Wertstellung', 'Verwendungszweck']
-    load_il_df = hb.clean_df_db_dups(raw_il_df, 'integration_layer', haushaltsbuch_db, columns) 
-    hb.load_table(load_il_df, 'integration_layer', haushaltsbuch_db, 'append')
+hb.load_table(raw_il_df, 'integration_layer', haushaltsbuch_db, 'replace')
 
 
 #-----------------------------------------------------------------------
@@ -151,7 +156,8 @@ revenue_type_df.drop_duplicates(inplace=True)
 places_df.drop_duplicates(inplace=True)
 category_df['Kategorie'] = 'no_data'
 category_df['Haendler'] = 'no_data'
-
+places_df['Latitude'] = None
+places_df['Longitude'] = None
 #-----------------------------------------------------------------------
 # CORE: Define categories
 #-----------------------------------------------------------------------
@@ -162,34 +168,37 @@ category_konsum = {'P+C':'Kleidung', 'H+M':'Kleidung', 'HM':'Kleidung', 'RIMOWA'
                     , 'SCHUH BODE':'Kleidung', 'WEINHANDLUNG':'Spirituosen', 'BVB':'Rest'
                     , 'MAYERSCHE':'Buecher', 'STAPLES':'Schreibwaren', 'AMAZON':'Amazon'
                     , 'PayPal':'Paypal', 'DECATHLON':'Kleidung', 'ERWIN MATUTT':'Rest'
-                    , 'Geco':'Lotto'}
+                    , 'Geco':'Lotto', 'KUHN':'Kleidung',}
 
 category_essen = {'METRO':'Einkauf', 'BLAUER ENGEL':'Restautrant', 'WINGAS':'Restaurant', 'REWE':'Einkauf'
                     , 'EDEKA':'Einkauf'
                     , 'AUCHAN':'Einkauf', 'HOLIDAY INN LUEBECK':'Restaurant', 'Jung + Frech':'Restaurant'
-                    , 'Vapiano':'Restaurant'
+                    , 'Vapiano':'Restaurant', 'VAPIANO':'Restaurant'
                     , 'RESTAURANT':'Restaurant', 'famila':'Einkauf', 'SUSHI':'Restaurant'
                     , 'RASTANLAGE':'Restaurant', 'REAL':'Einkauf'
                     , 'Osteria':'Restaurant', 'ALDI':'Einkauf', 'LIDL':'Einkauf', 'Auchan':'Einkauf'
-                    , 'SUPERMERCATO':'Einkauf', 'CITTI':'Einkauf'}
+                    , 'SUPERMERCATO':'Einkauf', 'CITTI':'Einkauf', 'LFC LUEBECK':'Restaurant'
+                    , 'AKTIV MARKT LUKASIEWICZ':'Einkauf'}
 
 category_haushalt = { 'congstar':'Handy', 'BAUHAUS':'Baumarkt', 'HELLWEG':'Baumarkt'
-                    , 'DB Vertrieb':'Mobility'
-                    , 'BEZIRKSREGIERUNG':'Steuern', 'Miete':'Miete', 'Abschlussposten':'Bank' }
+                    , 'DB Vertrieb':'Mobility'                     
+                    , 'BEZIRKSREGIERUNG':'Steuern', 'Miete':'Miete', 'Abschlussposten':'Bank' 
+                    , 'DEUTSCHE POST':'Post', 'Jonas Pasche':'Ueberspace'}
 
 
 category_auto = { 'SHELL':'Tanken', 'SB Tank':'Tanken', 'AVIA':'Tanken', 'OIL TANK':'Tanken'
                     , 'Orlen':'Tanken', 'JET':'Tanken'
                     , 'HDI':'Versicherung', 'BUNDESKASSE IN KIEL':'Steuern', 'Westfalen TS':'Tanken' }
 
-category_firma = { 'Flughafen Hamburg':'Parken', 'Payco Taxi':'Taxi'
+category_firma = { 'Flughafen Hamburg':'Parken', 'Payco Taxi':'Taxi', 'PAYCO':'Taxi'
                     , 'VBK-VERKEHRSBETRIEBE KARLS':'Mobility' }
 
 category_sport = { 'McFIT':'Fitnessstudio', 'FitX':'Fitnessstudio' }
 
 category_sonstiges = { 'TABAK':'Sonstiges' }
 
-category_einnahme = {'NTT':'Gehalt', 'LUISE':'Oma'}
+category_einnahme = {'NTT':'Gehalt', 'LUISE':'Oma', 'DESK SERVICES':'Honor 8'
+                        , 'STEUERVERWALTUNG NRW':'Steuern'}
 
 category_kreditkarte = { 'Kreditkarte':'Kreditkarte' }
 
@@ -220,6 +229,13 @@ category_dict = {'Konsum':category_konsum, 'Eseen':category_essen, 'Haushalt':ca
 #-----------------------------------------------------------------------
 transaction_df.rename(columns={"Soll": "Ausgaben", "Haben": "Einnahmen"},inplace=True)
 
+geolocator = geo.Nominatim()
+# location could be initialized once into dict to enhance performance in future
+for index, row in places_df.iterrows():
+    if row['Stadt'] != None:
+        location = geolocator.geocode(row['Stadt'])
+        places_df.set_value(index,'Latitude',location.latitude)
+        places_df.set_value(index,'Longitude',location.longitude)
 
 for index, row in category_df.iterrows():
     for key, value in category_dict.items():
@@ -249,7 +265,7 @@ hb.load_table(category_df, 'cl_categories', haushaltsbuch_db, 'replace')
 #-----------------------------------------------------------------------
 t_sql_query = 'select umsatzart_id, kategorie_id, ort_id, wertstellung, einnahmen, ausgaben from cl_transactions;'
 r_sql_query = 'select umsatzart_id, umsatzart from cl_revenue_types;'
-o_sql_query = 'select ort_id, stadt from cl_places;'
+o_sql_query = 'select ort_id, stadt, latitude, longitude from cl_places;'
 c_sql_query = 'select kategorie_id, kategorie, haendler, beguenstigterauftraggeber from cl_categories;'
 
 t_df = hb.read_sql(haushaltsbuch_db, t_sql_query)
