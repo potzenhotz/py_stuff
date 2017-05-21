@@ -15,58 +15,63 @@ import geopy as geo
 #Define input parameters
 #-----------------------------------------------------------------------
 #input_arguments = sys.argv
-par_load = 'append' #for integration layer
-#par_load = 'initial' #for integration layer
-file_path = '/Users/Potzenhotz/data/raw_data/'
-#file_name = 'Kontoumsaetze_350_355327800_20170114_175539.csv'
-#file_name = 'Kontoumsaetze_350_355327800_20170225_000825.csv'
-file_name = 'Kontoumsaetze_350_355327800_20170408_101130.csv'
-file_full = file_path + file_name
 
 #-----------------------------------------------------------------------
 #Define database
 #-----------------------------------------------------------------------
 haushaltsbuch_db = create_engine('sqlite:////Users/Potzenhotz/data/database/haushaltsbuch.db')
 
-#-----------------------------------------------------------------------
-#STAGING: Read csv
-#-----------------------------------------------------------------------
-raw_df = pd.read_csv(file_full, encoding="ISO-8859-1", sep=';', skiprows=4, skipfooter=1, engine='python')
-
-# Convert to datetimes
-# UPDATE: Does not work with initial append diff load -> therfore we stay with strings
-#raw_df['Buchungstag'] = pd.to_datetime(raw_df['Buchungstag'], format='%d.%m.%Y')
-#raw_df['Wert'] = pd.to_datetime(raw_df['Wert'], format='%d.%m.%Y')
-
-raw_df.rename(columns={'Wert': 'Wertstellung'}, inplace=True)
-raw_df.rename(columns={'Begünstigter / Auftraggeber': 'BeguenstigterAuftraggeber'}, inplace=True)
-
-raw_df['Soll'].fillna('0,0', inplace=True)
-raw_df['Haben'].fillna('0,0', inplace=True)
-
-raw_df['Umsatzart'].fillna(np.NaN, inplace=True)
-raw_df['BeguenstigterAuftraggeber'].fillna(np.NaN, inplace=True)
-raw_df['IBAN'].fillna(np.NaN, inplace=True)
-raw_df['BIC'].fillna(np.NaN, inplace=True)
-
-raw_df['Soll'] = raw_df['Soll'].str.replace('.', '')
-raw_df['Soll'] = raw_df['Soll'].str.replace(',', '.')
-raw_df['Soll'] = raw_df['Soll'].astype(float)
-
-raw_df['Haben'] = raw_df['Haben'].str.replace('.', '')
-raw_df['Haben'] = raw_df['Haben'].str.replace(',', '.')
-raw_df['Haben'] = raw_df['Haben'].astype(float)
-
-
-#-----------------------------------------------------------------------
-# STAGING: Load table
-#-----------------------------------------------------------------------
-if par_load == 'initial':
-    hb.load_table(raw_df, 'staging_layer', haushaltsbuch_db, 'replace')
-elif par_load == 'append':
-    columns = ['Wertstellung', 'Verwendungszweck']
-    load_raw_df = hb.clean_df_db_dups(raw_df, 'staging_layer', haushaltsbuch_db, columns) 
-    hb.load_table(load_raw_df, 'staging_layer', haushaltsbuch_db, 'append')
+file_path = '/Users/Potzenhotz/data/raw_data/'
+file_names = ['Kontoumsaetze_350_355327800_20170114_175539.csv']
+file_names.append('Kontoumsaetze_350_355327800_20170225_000825.csv')
+file_names.append('Kontoumsaetze_350_355327800_20170408_101130.csv')
+i=0
+for file_name in file_names:
+    file_full = file_path + file_name
+    if i==0: 
+        par_load = 'initial' #for integration layer
+    else:
+        par_load = 'append' #for integration layer
+    
+    #-----------------------------------------------------------------------
+    #STAGING: Read csv
+    #-----------------------------------------------------------------------
+    raw_df = pd.read_csv(file_full, encoding="ISO-8859-1", sep=';', skiprows=4, skipfooter=1, engine='python')
+    
+    # Convert to datetimes
+    # UPDATE: Does not work with initial append diff load -> therfore we stay with strings
+    #raw_df['Buchungstag'] = pd.to_datetime(raw_df['Buchungstag'], format='%d.%m.%Y')
+    #raw_df['Wert'] = pd.to_datetime(raw_df['Wert'], format='%d.%m.%Y')
+    
+    raw_df.rename(columns={'Wert': 'Wertstellung'}, inplace=True)
+    raw_df.rename(columns={'Begünstigter / Auftraggeber': 'BeguenstigterAuftraggeber'}, inplace=True)
+    
+    raw_df['Soll'].fillna('0,0', inplace=True)
+    raw_df['Haben'].fillna('0,0', inplace=True)
+    
+    raw_df['Umsatzart'].fillna(np.NaN, inplace=True)
+    raw_df['BeguenstigterAuftraggeber'].fillna(np.NaN, inplace=True)
+    raw_df['IBAN'].fillna(np.NaN, inplace=True)
+    raw_df['BIC'].fillna(np.NaN, inplace=True)
+    
+    raw_df['Soll'] = raw_df['Soll'].str.replace('.', '')
+    raw_df['Soll'] = raw_df['Soll'].str.replace(',', '.')
+    raw_df['Soll'] = raw_df['Soll'].astype(float)
+    
+    raw_df['Haben'] = raw_df['Haben'].str.replace('.', '')
+    raw_df['Haben'] = raw_df['Haben'].str.replace(',', '.')
+    raw_df['Haben'] = raw_df['Haben'].astype(float)
+    
+    
+    #-----------------------------------------------------------------------
+    # STAGING: Load table
+    #-----------------------------------------------------------------------
+    if par_load == 'initial':
+        hb.load_table(raw_df, 'staging_layer', haushaltsbuch_db, 'replace')
+    elif par_load == 'append':
+        columns = ['Wertstellung', 'Verwendungszweck']
+        load_raw_df = hb.clean_df_db_dups(raw_df, 'staging_layer', haushaltsbuch_db, columns) 
+        hb.load_table(load_raw_df, 'staging_layer', haushaltsbuch_db, 'append')
 
 #-----------------------------------------------------------------------
 # INTEGRATION: Read table
