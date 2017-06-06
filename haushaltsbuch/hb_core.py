@@ -35,17 +35,6 @@ loaded_staging_df = hb.read_sql(haushaltsbuch_db, staging_sql_query)
 #-----------------------------------------------------------------------
 #ACHTUNG CHANGES WERDEN ERST NACH DEM LOOP COMMITED
 #DAHER REIHENFOLGE WICHTIG
-uebersetzung = {'KREDITKARTE': 'Kreditkarte','Miete Lukas Lübeck': 'Miete'
-                , 'monatliche Sparrate':'ETF-Sparplan', 'Sparbuch': 'Sparbuch', 'Auxmoney':'Auxmoney'
-                , 'Miete und Co': 'Miete', 'Monatliche Einzahlung':'Miete', 'Sparen':'Sparbuch'
-                , 'Aktien':'Aktien', 'Akiten':'Aktien'}
-
-staedte = {'KARLSRUHE':'Karlsruhe', 'Dortmund Kley':'Dortmund', 'LUEBECK':'Luebeck'
-        ,'DORTMUND':'Dortmund','Dortmund':'Dortmund', 'KASSEL':'Kassel', 'SANDESNEBEN':'Sandesneben'
-        , 'Luebeck':'Luebeck', 'Lübeck':'Luebeck','QUARTU SANT':'Cagliari', 'VILLASIMIUS':'Cagliari'
-        , 'CAGLIARI':'Cagliari', 'Hamburg':'Hamburg', 'BOCHUM':'Bochum', 'Luxembourg':'Luxembourg'
-        , 'HH-AIRPORT':'Hamburg', 'HAMBURG':'Hamburg', 'GOTEBORG':'Gothenburg', 'HH-SEEBURG':'Hamburg'
-        ,}
 
 
 uebersetzung_sql_query = 'select raw_value, uebersetzung from ht_uebersetzung' 

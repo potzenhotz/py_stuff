@@ -17,7 +17,10 @@ Drop Tables
 connection = haushaltsbuch_db.raw_connection()
 cursor = connection.cursor()
 command = "DROP TABLE IF EXISTS ht_uebersetzung;"
+cursor.execute(command)
 command = "DROP TABLE IF EXISTS ht_staedte;"
+cursor.execute(command)
+command = "DROP TABLE IF EXISTS ht_auftraggeber;"
 cursor.execute(command)
 connection.commit()
 cursor.close()
@@ -38,6 +41,11 @@ staedte = Table('ht_staedte', metadata,
     Column('stadt', String)
 )
 
+auftraggeber = Table('ht_auftraggeber', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('raw_value', String),
+    Column('auftraggeber', String)
+)
 metadata.create_all(haushaltsbuch_db)
 '''
 Insert into tables
@@ -56,6 +64,7 @@ conn.execute(ins, raw_value='Aktien', uebersetzung='Aktien')
 conn.execute(ins, raw_value='Akiten', uebersetzung='Aktien')
 
 
+conn = haushaltsbuch_db.connect()
 ins = staedte.insert()
 conn.execute(ins, raw_value='Karlsruhe', stadt='Karlsruhe')
 conn.execute(ins, raw_value='Dortmund Kley', stadt='Dortmund')
@@ -76,5 +85,13 @@ conn.execute(ins, raw_value='HH-AIRPORT', stadt='Hamburg')
 conn.execute(ins, raw_value='HAMBURG', stadt='Hamburg')
 conn.execute(ins, raw_value='GOTEBORG', stadt='Gothenburg')
 conn.execute(ins, raw_value='HH-SEEBURG', stadt='Hamburg')
+
+conn = haushaltsbuch_db.connect()
+ins = auftraggeber.insert()
+conn.execute(ins, raw_value='HM', auftraggeber='H+M')
+conn.execute(ins, raw_value='PEEK+CLOPPENBURG', auftraggeber='P+C')
+conn.execute(ins, raw_value='Jonas Pasche', auftraggeber='UEBERSPACE')
+conn.execute(ins, raw_value='LUISE', auftraggeber='OMA')
+conn.execute(ins, raw_value='DESK SERVICES', auftraggeber='HONOR 8')
 
 
