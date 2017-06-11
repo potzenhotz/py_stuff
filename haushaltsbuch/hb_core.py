@@ -1,171 +1,162 @@
 #!/bin/env python3
 
-#-----------------------------------------------------------------------
-# Modules for import
-#-----------------------------------------------------------------------
+'''
+-----------------------------------------------------------------------
+ Modules for import
+-----------------------------------------------------------------------
+'''
 import pandas as pd
-from sqlalchemy import create_engine # database connection
+from sqlalchemy import create_engine, MetaData 
 import sys
 import csv
 import numpy as np
 import hb_functions as hb
-import geopy as geo
 
-#-----------------------------------------------------------------------
-#Define input parameters
-#-----------------------------------------------------------------------
-#input_arguments = sys.argv
-
+'''
 #-----------------------------------------------------------------------
 #Define database
 #-----------------------------------------------------------------------
+'''
 haushaltsbuch_db = create_engine('sqlite:////Users/Potzenhotz/data/database/haushaltsbuch.db')
 
-#-----------------------------------------------------------------------
-# CORE: Read table
-#-----------------------------------------------------------------------
-staging_sql_query = 'select wertstellung, umsatzart, auftraggeber\
-                , verwendungszweck, iban, bic, soll, haben from sl_DeuBa \
+'''
+-----------------------------------------------------------------------
+ CORE: Read table
+-----------------------------------------------------------------------
+'''
+print('Start reading tables')
+staging_sql_query = 'select sl_id, wertstellung, umsatzart, auftraggeber \
+                , stadt, verwendungszweck, iban, bic, soll, haben, new_flag from sl_DeuBa \
                 where new_flag = 1;'
-
 loaded_staging_df = hb.read_sql(haushaltsbuch_db, staging_sql_query)
+if loaded_staging_df.empty:
+    print('All rows from staging layer are already in core')
+    print('EXIT CODE')
+    sys.exit()
 
-#-----------------------------------------------------------------------
-# CORE: Modify rows and columns
-#-----------------------------------------------------------------------
-#ACHTUNG CHANGES WERDEN ERST NACH DEM LOOP COMMITED
-#DAHER REIHENFOLGE WICHTIG
+auftraggeber_sql_query = 'select auftraggeber_id, auftraggeber from cl_auftraggeber'
+auftraggeber_df = hb.read_sql(haushaltsbuch_db, auftraggeber_sql_query)
 
+umsatzart_sql_query = 'select umsatzart_id, umsatzart from cl_umsatzart'
+umsatzart_df = hb.read_sql(haushaltsbuch_db, umsatzart_sql_query)
 
-uebersetzung_sql_query = 'select raw_value, uebersetzung from ht_uebersetzung' 
-uebersetzung_df = hb.read_sql(haushaltsbuch_db, uebersetzung_sql_query)
-print(list(uebersetzung_df))
+ort_sql_query = 'select ort_id, stadt from cl_ort'
+ort_df = hb.read_sql(haushaltsbuch_db, ort_sql_query)
 
+metadata = MetaData(haushaltsbuch_db, reflect=True)
+sl_DeuBa = metadata.tables['sl_DeuBa']
+'''
+-----------------------------------------------------------------------
+ CORE: Modify rows and columns
+-----------------------------------------------------------------------
+'''
+print('Start modifing rows and columns')
 
-staedte_sql_query = 'select raw_value, stadt from ht_staedte' 
-staedte_df = hb.read_sql(haushaltsbuch_db, staedte_sql_query)
-print(list(staedte_df))
+flag_auftraggeber = 0
+flag_ort = 0
+flag_umsatzart = 0
+transaktion_df = pd.DataFrame(columns=['wertstellung'\
+                                        , 'auftraggeber_id'\
+                                        , 'ort_id'\
+                                        , 'umsatzart_id'\
+                                        , 'soll'\
+                                        , 'haben'\
+                                        ])
 
-
-loaded_staging_df['Stadt'] = None
-loaded_staging_df['Land'] = 'no_data'
-
+print('Start itterrows')
 for index, row in loaded_staging_df.iterrows():
-    if pd.isnull(row['Auftraggeber']):
-        loaded_staging_df.set_value(index,'Auftraggeber', row['Verwendungszweck'].split('/')[0])
+    flag_auftraggeber = 0
+    flag_ort = 0
+    flag_umsatzart = 0
+    for lkp_index, lkp_row in auftraggeber_df.iterrows():
+            if row['auftraggeber'].upper().find(lkp_row['auftraggeber'].upper()) != -1:
+                buffer_auftraggeber_id = lkp_row['auftraggeber_id']
+                flag_auftraggeber = 1
+            else:
+                del_index_auftraggeber = index
+    for lkp_index, lkp_row in ort_df.iterrows():
+        if not row['stadt']:
+            flag_ort=2
+        else:
+            if row['stadt'].upper().find(lkp_row['stadt'].upper()) != -1:
+                buffer_ort_id = lkp_row['ort_id']
+                flag_ort = 1
+            else:
+                del_index_ort = index
+    for lkp_index, lkp_row in umsatzart_df.iterrows():
+        if not row['umsatzart']:
+            flag_umsatzart=2
+        else:
+            if row['umsatzart'].upper().find(lkp_row['umsatzart'].upper()) != -1:
+                buffer_umsatzart_id = lkp_row['umsatzart_id']
+                flag_umsatzart = 1
+            else:
+                del_index_umsatzart = index
 
-    length_verw=len(row['Verwendungszweck'].split('/'))
-    #print(length_verw)
-    if length_verw > 2:
-        for s_index, s_row in staedte_df.iterrows():
-            if row['Verwendungszweck'].split('/')[2].find(s_row['raw_value']) !=-1:
-                loaded_staging_df.set_value(index,'Stadt', s_row['stadt'])
-                #print(row['Verwendungszweck'].split('/')[2], key, value, index)
-                break
-    elif length_verw == 2:
-        for s_index, s_row in staedte_df.iterrows():
-            if row['Verwendungszweck'].split('/')[1].find(s_row['raw_value']) !=-1:
-                loaded_staging_df.set_value(index,'Stadt', s_row['stadt'])
-                #print('###',row['Verwendungszweck'].split('/')[1], key, value, index)
-                break
-
-
-    for u_index, u_row in uebersetzung_df.iterrows():
-        if row['Verwendungszweck'].find(u_row['raw_value']) != -1:
-            loaded_staging_df.set_value(index,'Auftraggeber',u_row['uebersetzung'])
-            if u_row['raw_value'] == 'KREDITKARTE':
-                loaded_staging_df.set_value(index,'Umsatzart',u_row['uebersetzung'])
-
-    if row['Umsatzart'] is not None:
-        if row['Umsatzart'].find('Auszahlung Geldautomat') != -1:
-            loaded_staging_df.set_value(index,'Auftraggeber', 'Auszahlung Geldautomat')
-stop
-"""
-TODO:
-fill dimension tables
-fill transaction tables with dimension tables
-if not fined in dimension tables do not update staging table
-"""
-
-
-transaction_df = il_df[['Umsatzart_ID', 'Kategorie_ID', 'Ort_ID'
-                        , 'Soll', 'Haben', 'Wertstellung']].copy()
-revenue_type_df = il_df[['Umsatzart_ID','Umsatzart']].copy()
-places_df = il_df[['Ort_ID','Stadt']].copy()
-category_df = il_df[['Kategorie_ID','BeguenstigterAuftraggeber']].copy()
-
-category_df.drop_duplicates(inplace=True)
-revenue_type_df.drop_duplicates(inplace=True)
-places_df.drop_duplicates(inplace=True)
-category_df['Kategorie'] = 'no_data'
-category_df['Haendler'] = 'no_data'
-places_df['Latitude'] = None
-places_df['Longitude'] = None
-#-----------------------------------------------------------------------
-# CORE: Define categories
-#-----------------------------------------------------------------------
-category_konsum = {'P+C':'Kleidung', 'H+M':'Kleidung', 'HM':'Kleidung', 'RIMOWA':'Rimowa','SPOT':'Rest'
-                    , 'PEEK+CLOPPENBURG':'Kleidung'
-                    , 'DM':'Drogerie', 'HUGENDUBEL':'Buecher', 'DOUGLAS':'Drogerie', 'TKmaxx':'Kleidung'
-                    , 'SATURN':'Elektronik', 'ROSSMANN':'Drogerie'
-                    , 'SCHUH BODE':'Kleidung', 'WEINHANDLUNG':'Spirituosen', 'BVB':'Rest'
-                    , 'MAYERSCHE':'Buecher', 'STAPLES':'Schreibwaren', 'AMAZON':'Amazon'
-                    , 'PayPal':'Paypal', 'DECATHLON':'Kleidung', 'ERWIN MATUTT':'Rest'
-                    , 'Geco':'Lotto', 'KUHN':'Kleidung',}
-
-category_essen = {'METRO':'Einkauf', 'BLAUER ENGEL':'Restautrant', 'WINGAS':'Restaurant', 'REWE':'Einkauf'
-                    , 'EDEKA':'Einkauf'
-                    , 'AUCHAN':'Einkauf', 'HOLIDAY INN LUEBECK':'Restaurant', 'Jung + Frech':'Restaurant'
-                    , 'Vapiano':'Restaurant', 'VAPIANO':'Restaurant'
-                    , 'RESTAURANT':'Restaurant', 'famila':'Einkauf', 'SUSHI':'Restaurant'
-                    , 'RASTANLAGE':'Restaurant', 'REAL':'Einkauf'
-                    , 'Osteria':'Restaurant', 'ALDI':'Einkauf', 'LIDL':'Einkauf', 'Auchan':'Einkauf'
-                    , 'SUPERMERCATO':'Einkauf', 'CITTI':'Einkauf', 'LFC LUEBECK':'Restaurant'
-                    , 'AKTIV MARKT LUKASIEWICZ':'Einkauf'}
-
-category_haushalt = { 'congstar':'Handy', 'BAUHAUS':'Baumarkt', 'HELLWEG':'Baumarkt'
-                    , 'DB Vertrieb':'Mobility'                     
-                    , 'BEZIRKSREGIERUNG':'Steuern', 'Miete':'Miete', 'Abschlussposten':'Bank' 
-                    , 'DEUTSCHE POST':'Post', 'Jonas Pasche':'Ueberspace'}
-
-
-category_auto = { 'SHELL':'Tanken', 'SB Tank':'Tanken', 'AVIA':'Tanken', 'OIL TANK':'Tanken'
-                    , 'Orlen':'Tanken', 'JET':'Tanken'
-                    , 'HDI':'Versicherung', 'BUNDESKASSE IN KIEL':'Steuern', 'Westfalen TS':'Tanken' }
-
-category_firma = { 'Flughafen Hamburg':'Parken', 'Payco Taxi':'Taxi', 'PAYCO':'Taxi'
-                    , 'VBK-VERKEHRSBETRIEBE KARLS':'Mobility' }
-
-category_sport = { 'McFIT':'Fitnessstudio', 'FitX':'Fitnessstudio' }
-
-category_sonstiges = { 'TABAK':'Sonstiges' }
-
-category_einnahme = {'NTT':'Gehalt', 'LUISE':'Oma', 'DESK SERVICES':'Honor 8'
-                        , 'STEUERVERWALTUNG NRW':'Steuern'}
-
-category_kreditkarte = { 'Kreditkarte':'Kreditkarte' }
-
-category_bargeld = {'Auszahlung':'Auszahlung'}
-
-category_sparen = {'ETF-Sparplan':'Sparplan', 'Sparbuch':'Sparbuch', 'Auxmoney':'Auxmoney'
-                    , 'Aktien':'Aktien'}
-
-category_alex_lukas = {'IKEA':'Moebel', 'FUENFUNDDREISSIG':'Sonstiges', 'Verk.iersverbond':'Mobility'
-                        , 'PEAK PERFORMANCE GBG':'Kleidung'
-                        , 'Fink, Arne':'Moebel', 'Frieda Bühl':'Miete', 'KUECHE 1':'Moebel'}
-
-category_urlaub = {'MORISCA':'Urlaub', 'Urlaub':'Urlaub', 'Viktoria Boss':'Skiurlaub'}
+    if flag_auftraggeber == 1 \
+        and (flag_ort == 1 or flag_ort == 2)\
+        and (flag_umsatzart == 1 or flag_umsatzart ==2) :
+            to_df_auftraggeber_id = buffer_auftraggeber_id 
+            if flag_ort == 2:
+                to_df_ort_id = -1
+            else:
+                to_df_ort_id = buffer_ort_id
+            if flag_umsatzart == 2:
+                to_df_umsatzart_id = -1
+            else:
+                to_df_umsatzart_id = buffer_umsatzart_id 
+            to_df_wertstellung = row['wertstellung']
+            to_df_soll = row['soll']
+            to_df_haben = row['haben']
+            transaktion_df = transaktion_df.append(pd.Series([to_df_wertstellung\
+                                                , to_df_auftraggeber_id\
+                                                , to_df_ort_id\
+                                                , to_df_umsatzart_id\
+                                                , to_df_soll\
+                                                , to_df_haben\
+                                                ]\
+                                                , index=['wertstellung'\
+                                                ,'auftraggeber_id'\
+                                                ,'ort_id'\
+                                                ,'umsatzart_id'\
+                                                ,'soll'\
+                                                ,'haben'\
+                                                ]), ignore_index=True)
+            update_stmt = sl_DeuBa.update().where(sl_DeuBa.c.sl_id == row['sl_id']).values(new_flag=0)
+            conn = haushaltsbuch_db.connect()
+            conn.execute(update_stmt)
+    else:
+        print('#----------------------------------------------------#')
+        print('Following row could not be loaded \n and will be deleted in stage')
+        print(row['verwendungszweck'])
+        if flag_auftraggeber == 0:
+            print('Auftraggeber nicht gefunden', row['auftraggeber'])
+        elif flag_ort == 0:
+            print('Ort nicht gefunden', row['stadt'])
+        elif flag_umsatzart == 0:
+            print('Umsatzart nicht gefunden', row['umsatzart'])
+        delete_stmt = sl_DeuBa.delete().where(sl_DeuBa.c.sl_id == row['sl_id'])
+        conn = haushaltsbuch_db.connect()
+        conn.execute(delete_stmt)
+        
+'''
+-----------------------------------------------------------------------
+ CORE: drop columns
+-----------------------------------------------------------------------
+'''
+#0 for rows and 1 for columns
 
 
-category_undefined = {'no_data':'no_data'}
+'''
+-----------------------------------------------------------------------
+ CORE: Load table
+-----------------------------------------------------------------------
+'''
+#print(list(transaktion_df))
+#print(transaktion_df.head())
+hb.load_table(transaktion_df, 'cl_transaktion', haushaltsbuch_db, 'append')
 
-
-category_dict = {'Konsum':category_konsum, 'Eseen':category_essen, 'Haushalt':category_haushalt
-                , 'Sport':category_sport , 'Firma':category_firma, 'Sonstiges':category_sonstiges
-                , 'Einnahme':category_einnahme, 'Kreditkarte':category_kreditkarte
-                , 'Bargeld':category_bargeld, 'Sparen':category_sparen
-                , 'Alex+Lukas': category_alex_lukas, 'Urlaub': category_urlaub
-                , 'Auto': category_auto}
+'''
 
 #-----------------------------------------------------------------------
 # CORE: Modify rows and columns
@@ -197,9 +188,6 @@ for index, row in category_df.iterrows():
 # CORE: Load table
 #-----------------------------------------------------------------------
 hb.load_table(transaction_df, 'cl_transactions', haushaltsbuch_db, 'replace')
-hb.load_table(revenue_type_df, 'cl_revenue_types', haushaltsbuch_db, 'replace')
-hb.load_table(places_df, 'cl_places', haushaltsbuch_db, 'replace')
-hb.load_table(category_df, 'cl_categories', haushaltsbuch_db, 'replace')
 
 
 
@@ -246,4 +234,4 @@ hb.load_table(data_mart_df, 'data_mart', haushaltsbuch_db, 'replace')
 hb.save_csv(data_mart_df, '/Users/Potzenhotz/data/final_data/data_mart.csv', ';')
 hb.save_csv(data_mart_tableau, '/Users/Potzenhotz/data/final_data/data_mart_tableau.csv', ';')
 
-
+'''

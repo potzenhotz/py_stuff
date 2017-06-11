@@ -15,19 +15,19 @@ Staging
 '''
 metadata = MetaData()
 users = Table('sl_DeuBa', metadata,
-    Column('id', Integer, primary_key=True),
-    Column('Buchungstag', DateTime),
-    Column('Wertstellung', DateTime),
-    Column('Umsatzart', String),
-    Column('Auftraggeber', String),
-    Column('Stadt', String),
-    Column('Land', String),
-    Column('Verwendungszweck', String),
+    Column('sl_id', Integer, primary_key=True),
+    Column('buchungstag', DateTime),
+    Column('wertstellung', DateTime),
+    Column('umsatzart', String),
+    Column('auftraggeber', String),
+    Column('stadt', String),
+    Column('land', String),
+    Column('verwendungszweck', String),
     Column('IBAN', String),
     Column('BIC', String),
-    Column('Soll', Float),
-    Column('Haben', Float),
-    Column('Waehrung', String),
+    Column('soll', Float),
+    Column('haben', Float),
+    Column('waehrung', String),
     Column('new_flag', Integer),
 )
 
@@ -52,7 +52,7 @@ auftraggeber = Table('cl_auftraggeber', metadata,
 )
 
 ort = Table('cl_ort', metadata,
-    Column('ord_id', Integer, primary_key=True),
+    Column('ort_id', Integer, primary_key=True),
     Column('stadt', String, nullable=False),
     Column('land', String),
     Column('lat', String),
@@ -67,27 +67,20 @@ umsatzart = Table('cl_umsatzart', metadata,
 
 transaktion = Table('cl_transaktion', metadata,
     Column('transaktions_id', Integer, primary_key=True),
-    Column('auftraggeber_id', None, ForeignKey('cl_haendler.haendlerkategorie_id')),
-    Column('auftraggeber_id', None, ForeignKey('cl_ort.ort_id')),
-    Column('auftraggeber_id', None, ForeignKey('cl_umsatzart.umsatzart_id')),
     Column('wertstellung', DateTime, nullable=False),
-    Column('verwendungszweck', String, nullable=False),
+    Column('auftraggeber_id', None, ForeignKey('cl_haendler.haendlerkategorie_id')),
+    Column('ort_id', None, ForeignKey('cl_ort.ort_id')),
+    Column('umsatzart_id', None, ForeignKey('cl_umsatzart.umsatzart_id')),
     Column('soll', Float),
-    Column('haben', Float)
+    Column('haben', Float),
 )
 
+#mart_konsum = Table('dm_konsum', metadata,
+#    Column('dm_konsum_id', Integer, primary_key=True),
+#    Column('monat', String, nullable=False),
+#    Column('konsumkategorie', String, nullable=False),
+#    Column('soll', Float )
+#)
 
 
 metadata.create_all(haushaltsbuch_db)
-'''
-Insert into tables
-'''
-"""
-ins = users.insert().values(name='lukas', fullname='Lukas Muessle')
-print(str(ins))
-print(ins.compile().params  )
-
-
-conn = haushaltsbuch_db.connect()
-result = conn.execute(ins)
-"""

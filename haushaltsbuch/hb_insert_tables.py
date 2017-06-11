@@ -9,6 +9,7 @@ import pandas as pd
 from sqlalchemy import create_engine, Table, Column, MetaData, ForeignKey
 from sqlalchemy import DateTime, Integer, String, Float
 from sqlalchemy import inspect, text, select
+import geopy as geo
 '''
 ########################################################################
 Get tables
@@ -289,7 +290,7 @@ for key, value in dict_sport.items():
         conn.execute(ins, haendlerkategorie_id=row[0], auftraggeber=subvalue)
 
 #SONSTIGES
-list_sonstiges = ['TABAK']
+list_sonstiges = ['TABAK', 'TRACKS + TAKE OFF']
 conn = haushaltsbuch_db.connect()
 result = conn.execute(select_stmt, x='Sonstiges')
 row = result.fetchone()
@@ -366,4 +367,34 @@ for key, value in dict_urlaub.items():
     for subvalue in value:
         conn.execute(ins, haendlerkategorie_id=row[0], auftraggeber=subvalue)
 
+
+'''
+ORT
+'''
+ins = cl_ort.insert()
+conn = haushaltsbuch_db.connect()
+geolocator = geo.Nominatim()
+staedte = ['Dortmund', 'Luebeck', 'Sandesneben', 'Kassel', 'Karlsruhe', 'Luxembourg', 'Hamburg', 'Cagliari'\
+            , 'Bochum', 'Gothenburg'
+            ]
+for city in staedte:
+    location = geolocator.geocode(city)
+    try:
+        conn.execute(ins, stadt=city, lat=location.latitude, lon=location.longitude)
+    except:
+        print('Error for city:', city)
+        print(sys.exc_info()[0])
+        print(sys.exc_info()[1])
+
+
+'''
+UMSATZART
+'''
+ins = cl_umsatzart.insert()
+conn = haushaltsbuch_db.connect()
+umsatzart = ["Auszahlung Geldautomat", "Kartenzahlung", "Kreditkarte", "SEPA-Dauerauftrag an"\
+            , "SEPA-Gutschrift von", "SEPA-Lastschrift (ELV) von", "SEPA-Lastschrift von"\
+            , "SEPA-Überweisung an"]
+for art in umsatzart:
+    conn.execute(ins, umsatzart=art)
 

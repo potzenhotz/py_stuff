@@ -18,8 +18,8 @@ def read_normalize_value():
 def normalize_data(df, field, val_normalize):
     df.loc[:,field] /= val_normalize
 
-def load_table(df, table_name, database, load_type):
-    df.to_sql(table_name, database, if_exists=load_type, index=False)
+def load_table(df, table_name, database, load_type, index_type=False):
+    df.to_sql(table_name, database, if_exists=load_type, index=index_type)
 
 def save_csv(df, file_path, seperator):
     df.to_csv(file_path, sep=seperator, index=False)
