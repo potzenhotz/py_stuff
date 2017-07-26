@@ -10,6 +10,7 @@ from sqlalchemy import create_engine, Table, Column, MetaData, ForeignKey
 from sqlalchemy import DateTime, Integer, String, Float
 from sqlalchemy import inspect, text, select
 import geopy as geo
+import time
 '''
 ########################################################################
 Get tables
@@ -138,6 +139,7 @@ conn = haushaltsbuch_db.connect()
 result = conn.execute(select_stmt, x="Sonstiges")
 row = result.fetchone()
 conn.execute(ins, konsumkategorie_id=row[0], haendlerkategorie='Sonstiges')
+conn.execute(ins, konsumkategorie_id=row[0], haendlerkategorie='Sonstiges Spenden')
 
 conn = haushaltsbuch_db.connect()
 result = conn.execute(select_stmt, x="Einnahme")
@@ -192,10 +194,11 @@ ins = cl_auftraggeber.insert()
 select_stmt = 'SELECT haendlerkategorie_id  FROM cl_haendler WHERE haendlerkategorie=:x'
 
 #KONSUM
-list_kleidung = ['P+C', 'H+M', 'TKMAXX', 'KUHN', 'SCHUH BODE']
-list_rest = ['RIMOWA','SPOT', 'BVB','ERWIN MATUTT']
+list_kleidung = ['P+C', 'H+M', 'TKMAXX', 'KUHN', 'SCHUH BODE', 'FREITAG LAB.', 'PETRA WITT MY HATS']
+list_rest = ['RIMOWA','SPOT', 'BVB','ERWIN MATUTT', 'TCHIBO', 'MTB-MARKET GMBH', 'STOWA GmbH'\
+            , 'BLUME 2000']
 list_drogerie = ['DM', 'DOUGLAS','ROSSMANN']
-list_buecher = ['HUGENDUBEL', 'MAYERSCHE' ]
+list_buecher = ['HUGENDUBEL', 'MAYERSCHE', 'PRESSE + BUCH' ]
 list_elektronik = ['SATURN', 'MEDIA MARKT']
 list_spirituosen = ['WEINHANDLUNG']
 list_schreibwaren = ['STAPLES']
@@ -218,9 +221,10 @@ for key, value in dict_konsum.items():
 
 #ESSEN
 list_restaurant = ['BLAUER ENGEL', 'WINGAS','HOLIDAY INN LUEBECK', 'JUNG + FRECH', 'VAPIANO'\
-                    , 'RESTAURANT', 'SUSHI', 'RASTANLAGE', 'OSTERIA', 'LFC LUEBECK'] 
+                    , 'RESTAURANT', 'SUSHI', 'RASTANLAGE', 'OSTERIA', 'LFC LUEBECK', 'NORDSEE LUEBECK'] 
 list_einkauf = ['REWE', 'EDEKA', 'METRO', 'AUCHAN', 'FAMILA', 'REAL', 'ALDI', 'LIDL'\
-                'AUCHAN', 'AKTIV MARKT LUKASIEWICZ', 'CITTI', 'SUPERMERCATO' ]
+                'AUCHAN', 'AKTIV MARKT LUKASIEWICZ', 'CITTI', 'SUPERMERCATO', 'KONDITOREI JUNGE'\
+                , 'LANDWEGE' ]
 
 dict_essen = {'Restaurant':list_restaurant, 'Einkauf':list_einkauf}
 for key, value in dict_essen.items():
@@ -265,7 +269,7 @@ for key, value in dict_auto.items():
 
 #FIRMA
 list_parken = ['Flughafen Hamburg']
-list_taxi = ['Payco Taxi', 'PAYCO']
+list_taxi = ['Payco Taxi', 'PAYCO', 'TAXI FRANKFURT']
 list_firma_mobility = ['VBK-VERKEHRSBETRIEBE KARLS']
 
 dict_firma = {'Parken':list_parken, 'Taxi':list_taxi\
@@ -279,7 +283,7 @@ for key, value in dict_firma.items():
 
 #SPORT
 list_fitnessstudio = [ 'MCFIT', 'FITX']
-list_sportartikel = ['DECATHLON']
+list_sportartikel = ['DECATHLON', 'SURF-CENTER']
 
 dict_sport = {'Fitnessstudio':list_fitnessstudio, 'Sportartikel':list_sportartikel}
 for key, value in dict_sport.items():
@@ -290,12 +294,15 @@ for key, value in dict_sport.items():
         conn.execute(ins, haendlerkategorie_id=row[0], auftraggeber=subvalue)
 
 #SONSTIGES
-list_sonstiges = ['TABAK', 'TRACKS + TAKE OFF']
-conn = haushaltsbuch_db.connect()
-result = conn.execute(select_stmt, x='Sonstiges')
-row = result.fetchone()
-for subvalue in list_sonstiges:
-    conn.execute(ins, haendlerkategorie_id=row[0], auftraggeber=subvalue)
+list_sonstiges = ['TABAK', 'TRACKS + TAKE OFF', 'LUCKY BIKE']
+list_sonstiges_spenden = ['EVG LANDWEGE eG']
+dict_sonstiges = {'Sonstiges':list_sonstiges, 'Spenden':list_sonstiges_spenden}
+for key, value in dict_sonstiges.items():
+    conn = haushaltsbuch_db.connect()
+    result = conn.execute(select_stmt, x='Sonstiges')
+    row = result.fetchone()
+    for subvalue in list_sonstiges:
+        conn.execute(ins, haendlerkategorie_id=row[0], auftraggeber=subvalue)
 
 #EINNAHMEN
 list_gehalt = ['NTT']
@@ -345,7 +352,7 @@ for key, value in dict_sparen.items():
 #ALEX+LUKAS
 list_gemeinsame_moebel = ['IKEA', 'Fink, Arne', 'KUECHE 1']
 list_sonstige_gemeinsame_ausgaben = ['Frieda Bühl', 'Verk.iersverbond', 'FUENFUNDDREISSIG'\
-                                    , 'PEAK PERFORMANCE']
+                                    , 'PEAK PERFORMANCE', 'Schleswiger Versicherungsservice AG']
 
 dict_al = {'Gemeinsame Moebel':list_gemeinsame_moebel\
                     , 'AL Sonstiges':list_sonstige_gemeinsame_ausgaben}
@@ -357,7 +364,7 @@ for key, value in dict_al.items():
         conn.execute(ins, haendlerkategorie_id=row[0], auftraggeber=subvalue)
 #URLAUB
 list_urlaub_sardinien = ['MORISCA', 'URLAUB']
-list_urlaub_ski = ['VIKTORIA BOSS']
+list_urlaub_ski = ['VIKTORIA BOSS', '8 A HUIT']
 
 dict_urlaub = {'Urlaub Sardinien':list_urlaub_sardinien, 'Urlaub Ski':list_urlaub_ski}
 for key, value in dict_urlaub.items():
@@ -366,26 +373,6 @@ for key, value in dict_urlaub.items():
     row = result.fetchone()
     for subvalue in value:
         conn.execute(ins, haendlerkategorie_id=row[0], auftraggeber=subvalue)
-
-
-'''
-ORT
-'''
-ins = cl_ort.insert()
-conn = haushaltsbuch_db.connect()
-geolocator = geo.Nominatim()
-staedte = ['Dortmund', 'Luebeck', 'Sandesneben', 'Kassel', 'Karlsruhe', 'Luxembourg', 'Hamburg', 'Cagliari'\
-            , 'Bochum', 'Gothenburg'
-            ]
-for city in staedte:
-    location = geolocator.geocode(city)
-    try:
-        conn.execute(ins, stadt=city, lat=location.latitude, lon=location.longitude)
-    except:
-        print('Error for city:', city)
-        print(sys.exc_info()[0])
-        print(sys.exc_info()[1])
-
 
 '''
 UMSATZART
@@ -397,4 +384,24 @@ umsatzart = ["Auszahlung Geldautomat", "Kartenzahlung", "Kreditkarte", "SEPA-Dau
             , "SEPA-Überweisung an"]
 for art in umsatzart:
     conn.execute(ins, umsatzart=art)
+
+'''
+ORT
+'''
+ins = cl_ort.insert()
+conn = haushaltsbuch_db.connect()
+staedte = ['Dortmund', 'Luebeck', 'Sandesneben', 'Kassel', 'Karlsruhe', 'Luxembourg', 'Hamburg', 'Cagliari'\
+            , 'Bochum', 'Gothenburg'
+            ]
+for city in staedte:
+    geolocator = geo.Nominatim()
+    location = geolocator.geocode(city, timeout=10)
+    try:
+        conn.execute(ins, stadt=city, lat=location.latitude, lon=location.longitude)
+    except:
+        print('Error for city:', city)
+        print(sys.exc_info()[0])
+        print(sys.exc_info()[1])
+
+
 

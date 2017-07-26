@@ -139,13 +139,6 @@ for index, row in loaded_staging_df.iterrows():
         conn = haushaltsbuch_db.connect()
         conn.execute(delete_stmt)
         
-'''
------------------------------------------------------------------------
- CORE: drop columns
------------------------------------------------------------------------
-'''
-#0 for rows and 1 for columns
-
 
 '''
 -----------------------------------------------------------------------
@@ -156,82 +149,3 @@ for index, row in loaded_staging_df.iterrows():
 #print(transaktion_df.head())
 hb.load_table(transaktion_df, 'cl_transaktion', haushaltsbuch_db, 'append')
 
-'''
-
-#-----------------------------------------------------------------------
-# CORE: Modify rows and columns
-#-----------------------------------------------------------------------
-transaction_df.rename(columns={"Soll": "Ausgaben", "Haben": "Einnahmen"},inplace=True)
-
-geolocator = geo.Nominatim()
-# location could be initialized once into dict to enhance performance in future
-for index, row in places_df.iterrows():
-    if row['Stadt'] != None:
-        location = geolocator.geocode(row['Stadt'])
-        places_df.set_value(index,'Latitude',location.latitude)
-        places_df.set_value(index,'Longitude',location.longitude)
-
-for index, row in category_df.iterrows():
-    for key, value in category_dict.items():
-        for v_key, v_value in value.items():
-            if row['BeguenstigterAuftraggeber'].find(v_key) != -1:
-                category_df.set_value(index,'Kategorie', key)
-                category_df.set_value(index,'Haendler', v_value)
-
-for index, row in category_df.iterrows():
-    for k_undefined, v_undefined in category_undefined.items():
-        if row['Kategorie'].find(k_undefined) != -1:
-            category_df.set_value(index,'Kategorie', 'Undefiniert')
-            category_df.set_value(index,'Haendler', 'Undefiniert')
-
-#-----------------------------------------------------------------------
-# CORE: Load table
-#-----------------------------------------------------------------------
-hb.load_table(transaction_df, 'cl_transactions', haushaltsbuch_db, 'replace')
-
-
-
-#-----------------------------------------------------------------------
-# DATA MART: Read table
-#-----------------------------------------------------------------------
-t_sql_query = 'select umsatzart_id, kategorie_id, ort_id, wertstellung, einnahmen, ausgaben from cl_transactions;'
-r_sql_query = 'select umsatzart_id, umsatzart from cl_revenue_types;'
-o_sql_query = 'select ort_id, stadt, latitude, longitude from cl_places;'
-c_sql_query = 'select kategorie_id, kategorie, haendler, beguenstigterauftraggeber from cl_categories;'
-
-t_df = hb.read_sql(haushaltsbuch_db, t_sql_query)
-r_df = hb.read_sql(haushaltsbuch_db, r_sql_query)
-o_df = hb.read_sql(haushaltsbuch_db, o_sql_query)
-c_df = hb.read_sql(haushaltsbuch_db, c_sql_query)
-
-#-----------------------------------------------------------------------
-# DATA MART: Modify data
-#-----------------------------------------------------------------------
-t_df['Bilanz'] = 'TBD'
-for index, row in t_df.iterrows():
-    if row['Ausgaben'] < 0.0:
-        t_df.set_value(index,'Bilanz',row['Ausgaben'])
-    elif row['Einnahmen'] > 0:
-        t_df.set_value(index,'Bilanz',row['Einnahmen'])
-
-t_df.loc[:,'Ausgaben'] *= -1
-
-dummy_df = pd.merge(left=t_df, right=r_df, on='Umsatzart_ID', how='left')
-dummy_df_2 = pd.merge(left=dummy_df, right=o_df, on='Ort_ID', how='left')
-data_mart_df = pd.merge(left=dummy_df_2, right=c_df, on='Kategorie_ID', how='inner')
-
-val_normalize = hb.read_normalize_value()
-data_mart_tableau = data_mart_df.copy()
-
-hb.normalize_data(data_mart_tableau, 'Ausgaben', val_normalize)
-hb.normalize_data(data_mart_tableau, 'Einnahmen', val_normalize)
-hb.normalize_data(data_mart_tableau, 'Bilanz', val_normalize)
-
-#-----------------------------------------------------------------------
-# DATA MART: Load table
-#-----------------------------------------------------------------------
-hb.load_table(data_mart_df, 'data_mart', haushaltsbuch_db, 'replace')
-hb.save_csv(data_mart_df, '/Users/Potzenhotz/data/final_data/data_mart.csv', ';')
-hb.save_csv(data_mart_tableau, '/Users/Potzenhotz/data/final_data/data_mart_tableau.csv', ';')
-
-'''
