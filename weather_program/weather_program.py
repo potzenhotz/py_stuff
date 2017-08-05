@@ -40,7 +40,7 @@ email_dict = {'Lukas': 'lukasmuessle@gmail.com'
               }
 
 #lukas_cities = ['Koeln', 'Duesseldorf','Dortmund']
-lukas_cities = ['Koeln']
+lukas_cities = ['Luebeck']
 lukas_work_cities = ['Karlsruhe']
 alex_cities = ['Luebeck']
 florian_cities = ['Osnarbrueck', 'Frankfurt']
@@ -130,7 +130,8 @@ for user in users:
         print("%%%Value Error.%%%")
         raise
       except KeyError:
-        print("%%%City name error.%%%", sys.exc_info())
+        print("%%%City name error.%%% \n", sys.exc_info())
+        print("%%%Variable Information.%%% \n", user, cities_var)
         raise
       except:
         #for what ever reason it fails sometimes 
