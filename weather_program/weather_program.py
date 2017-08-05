@@ -23,6 +23,8 @@ city_dict = {'Dortmund': 'Dortmund' + ', ger'
             ,'Oslo': 'Oslo' + ', no'
             ,'Noordwijk': 'Noordwijk' + ', nl'
             ,'Osnarbrueck': 'Osnarbrueck' + ', ger'
+            ,'Frankfurt': 'Frankfurt' + ', ger'
+            ,'Karlsruhe': 'Karlsruhe' + ', ger'
             }
 
 email_dict = {'Lukas': 'lukasmuessle@gmail.com'
@@ -39,9 +41,9 @@ email_dict = {'Lukas': 'lukasmuessle@gmail.com'
 
 #lukas_cities = ['Koeln', 'Duesseldorf','Dortmund']
 lukas_cities = ['Koeln']
-lukas_work_cities = ['Duesseldorf']
+lukas_work_cities = ['Karlsruhe']
 alex_cities = ['Luebeck']
-florian_cities = ['Osnarbrueck', 'Duesseldorf']
+florian_cities = ['Osnarbrueck', 'Frankfurt']
 frederic_cities = ['Muenchen']
 micha_cities = ['Koeln']
 friedel_cities = ['Noordwijk']
@@ -72,8 +74,8 @@ users = ['Lukas'
         , 'Jobst'
         , 'Tim'
         ]
-users = ['Lukas', 'LukasWork', 'Alex', 'Florian']
-#users = ['Lukas', 'LukasWork']
+#users = ['Lukas', 'LukasWork', 'Alex', 'Florian']
+users = ['Lukas', 'LukasWork', 'Florian']
 #users = ['Lukas']
 
 for user in users:
