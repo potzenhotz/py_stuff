@@ -122,7 +122,10 @@ def current_weather(input_city):
     if key == 'observation':
       wind = weather.get_wind()
       wind_speed = wind['speed']
-      wind_deg = wind['deg']
+      try:
+        wind_deg = wind['deg']
+      except:
+        wind_deg = 'no_data'
       temp = weather.get_temperature(unit='celsius')
       temp_max = temp['temp_max']
       temp_min = temp['temp_min']
