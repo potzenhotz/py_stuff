@@ -22,10 +22,14 @@ import geopy as geo
 haushaltsbuch_db = create_engine('sqlite:////Users/Potzenhotz/data/database/haushaltsbuch.db')
 
 file_path = '/Users/Potzenhotz/data/raw_data/'
-file_names = []
-file_names.append('Kontoumsaetze_350_355327800_20170114_175539.csv')
-file_names.append('Kontoumsaetze_350_355327800_20170607_174341.csv')
+file_name = file_path+'read_data_lines.txt'
+with open(file_name) as f:
+    file_names = f.read().splitlines()
+#file_names.append('Kontoumsaetze_350_355327800_20170114_175539.csv')
+#file_names.append('Kontoumsaetze_350_355327800_20170607_174341.csv')
+#file_names.append('Kontoumsaetze_350_355327800_20170915_140407.csv')
 #file_names.append('test_file.csv')
+
 for file_name in file_names:
     file_full = file_path + file_name
     

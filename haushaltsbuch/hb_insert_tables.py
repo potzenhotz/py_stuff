@@ -120,6 +120,7 @@ conn.execute(ins, konsumkategorie_id=row[0], haendlerkategorie='Mobility')
 conn.execute(ins, konsumkategorie_id=row[0], haendlerkategorie='Steuern')
 conn.execute(ins, konsumkategorie_id=row[0], haendlerkategorie='Bank')
 conn.execute(ins, konsumkategorie_id=row[0], haendlerkategorie='Miete')
+conn.execute(ins, konsumkategorie_id=row[0], haendlerkategorie='Hausrat')
 conn.execute(ins, konsumkategorie_id=row[0], haendlerkategorie='Haushalt Sonstiges')
 
 conn = haushaltsbuch_db.connect()
@@ -184,6 +185,7 @@ conn.execute(ins, konsumkategorie_id=row[0], haendlerkategorie='Tanken')
 conn.execute(ins, konsumkategorie_id=row[0], haendlerkategorie='Auto Versicherung')
 conn.execute(ins, konsumkategorie_id=row[0], haendlerkategorie='Auto Steuern')
 conn.execute(ins, konsumkategorie_id=row[0], haendlerkategorie='Reparatur')
+conn.execute(ins, konsumkategorie_id=row[0], haendlerkategorie='Auto Sonstiges')
 
 '''
 ########################################################################
@@ -221,10 +223,11 @@ for key, value in dict_konsum.items():
 
 #ESSEN
 list_restaurant = ['BLAUER ENGEL', 'WINGAS','HOLIDAY INN LUEBECK', 'JUNG + FRECH', 'VAPIANO'\
-                    , 'RESTAURANT', 'SUSHI', 'RASTANLAGE', 'OSTERIA', 'LFC LUEBECK', 'NORDSEE LUEBECK'] 
+                    , 'RESTAURANT', 'SUSHI', 'RASTANLAGE', 'OSTERIA', 'LFC LUEBECK', 'NORDSEE LUEBECK'\
+                    , 'NEUE ROESTEREI GMBH', 'PETER PANE', 'NIEDEREGGER'] 
 list_einkauf = ['REWE', 'EDEKA', 'METRO', 'AUCHAN', 'FAMILA', 'REAL', 'ALDI', 'LIDL'\
                 'AUCHAN', 'AKTIV MARKT LUKASIEWICZ', 'CITTI', 'SUPERMERCATO', 'KONDITOREI JUNGE'\
-                , 'LANDWEGE' ]
+                , 'LANDWEGE', 'E-CENTER' ]
 
 dict_essen = {'Restaurant':list_restaurant, 'Einkauf':list_einkauf}
 for key, value in dict_essen.items():
@@ -242,11 +245,12 @@ list_mobility = ['DB VERTRIEB']
 list_steuern = ['BEZIRKSREGIERUNG']
 list_miete = ['MIETE']
 list_bank = ['ABSCHLUSSPOSTEN']
-list_haushalt_sonstiges = ['UEBERSPACE', 'DEUTSCHE POST']
+list_hausrat = ['SCHLESWIGER VERSICH']
+list_haushalt_sonstiges = ['UEBERSPACE', 'DEUTSCHE POST', 'WARENHAUS WALTROP', 'APOTHEKE']
 
 dict_haushalt = {'Handy':list_handy, 'Baumarkt':list_baumarkt, 'Mobility':list_mobility\
                 , 'Steuern':list_steuern, 'Miete':list_miete, 'Bank':list_bank\
-                , 'Haushalt Sonstiges':list_haushalt_sonstiges}
+                , 'Haushalt Sonstiges':list_haushalt_sonstiges, 'Hausrat':list_hausrat}
 for key, value in dict_haushalt.items():
     conn = haushaltsbuch_db.connect()
     result = conn.execute(select_stmt, x=key)
@@ -254,12 +258,15 @@ for key, value in dict_haushalt.items():
     for subvalue in value:
         conn.execute(ins, haendlerkategorie_id=row[0], auftraggeber=subvalue)
 #AUTO
-list_tanken = ['SHELL', 'SB TANK', 'AVIA', 'OIL TANK', 'ORLEN', 'JET', 'WESTFALEN TS']
+list_tanken = ['SHELL', 'SB TANK', 'AVIA', 'OIL TANK', 'ORLEN', 'JET', 'WESTFALEN TS'\
+                , 'Aral']
 list_auto_steuern = ['BUNDESKASSE IN KIEL']
 list_auto_versicherung = ['HDI']
+list_auto_sonstiges = ['SCHLUESSEL-REESE']
 
 dict_auto = {'Tanken':list_tanken, 'Auto Steuern':list_auto_steuern\
-            , 'Auto Versicherung':list_auto_versicherung}
+            , 'Auto Versicherung':list_auto_versicherung\
+            , 'Auto Sonstiges':list_auto_sonstiges}
 for key, value in dict_auto.items():
     conn = haushaltsbuch_db.connect()
     result = conn.execute(select_stmt, x=key)
@@ -268,7 +275,7 @@ for key, value in dict_auto.items():
         conn.execute(ins, haendlerkategorie_id=row[0], auftraggeber=subvalue)
 
 #FIRMA
-list_parken = ['Flughafen Hamburg']
+list_parken = ['Flughafen Hamburg', 'HAMBURG AIRPORT']
 list_taxi = ['Payco Taxi', 'PAYCO', 'TAXI FRANKFURT']
 list_firma_mobility = ['VBK-VERKEHRSBETRIEBE KARLS']
 
@@ -294,7 +301,7 @@ for key, value in dict_sport.items():
         conn.execute(ins, haendlerkategorie_id=row[0], auftraggeber=subvalue)
 
 #SONSTIGES
-list_sonstiges = ['TABAK', 'TRACKS + TAKE OFF', 'LUCKY BIKE']
+list_sonstiges = ['TABAK', 'TRACKS + TAKE OFF', 'LUCKY BIKE', 'Bernd', 'Reservix']
 list_sonstiges_spenden = ['EVG LANDWEGE eG']
 dict_sonstiges = {'Sonstiges':list_sonstiges, 'Spenden':list_sonstiges_spenden}
 for key, value in dict_sonstiges.items():
@@ -306,7 +313,7 @@ for key, value in dict_sonstiges.items():
 
 #EINNAHMEN
 list_gehalt = ['NTT']
-list_einnahmen_sonstiges = ['OMA', 'HONOR 8']
+list_einnahmen_sonstiges = ['OMA', 'HONOR 8', 'COMUTO','Frederic Krehl']
 list_einnahmen_steuern = ['STEUERVERWALTUNG NRW']
 
 dict_einnahmen = {'Gehalt':list_gehalt, 'Einnahmen Sonstiges':list_einnahmen_sonstiges\
@@ -336,7 +343,7 @@ for subvalue in list_bargeld:
     conn.execute(ins, haendlerkategorie_id=row[0], auftraggeber=subvalue)
 
 #SPAREN
-list_sparplan = ['ETF-Sparplan']
+list_sparplan = ['ETF-Sparplan', 'Lukas']
 list_sparbuch = ['Sparbuch']
 list_sonstige_investments = ['Auxmoney', 'Aktien']
 
