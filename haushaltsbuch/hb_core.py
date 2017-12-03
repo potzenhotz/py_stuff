@@ -1,151 +1,93 @@
 #!/bin/env python3
 
-'''
------------------------------------------------------------------------
- Modules for import
------------------------------------------------------------------------
-'''
+#-----------------------------------------------------------------------
+# Modules for import
+#-----------------------------------------------------------------------
 import pandas as pd
-from sqlalchemy import create_engine, MetaData 
+from sqlalchemy import create_engine, text
 import sys
 import csv
 import numpy as np
 import hb_functions as hb
+import lm_logging as lml
+import datetime
 
-'''
+
+#-----------------------------------------------------------------------
+# Logging
+#-----------------------------------------------------------------------
+log = lml.simple_logging()
+#log.set_logfile()
+log.set_console()
+logger = log.rootLogger
+#logger.setLevel(log.logging.ERROR)
+logger.setLevel(log.logging.INFO)
+#logger.setLevel(log.logging.DEBUG)
+
+
 #-----------------------------------------------------------------------
 #Define database
 #-----------------------------------------------------------------------
-'''
 haushaltsbuch_db = create_engine('sqlite:////Users/Potzenhotz/data/database/haushaltsbuch.db')
 
-'''
------------------------------------------------------------------------
- CORE: Read table
------------------------------------------------------------------------
-'''
-print('Start reading tables')
-staging_sql_query = 'select sl_id, wertstellung, umsatzart, auftraggeber \
-                , stadt, verwendungszweck, iban, bic, soll, haben, new_flag from sl_DeuBa \
-                where new_flag = 1;'
-loaded_staging_df = hb.read_sql(haushaltsbuch_db, staging_sql_query)
+
+#-----------------------------------------------------------------------
+#Read Staging
+#-----------------------------------------------------------------------
+logger.info('Start reading staging layer')
+dates_staging = ['wertstellung', 'buchungstag']
+sql_q_staging = 'select * from sl_DeuBa;'
+loaded_staging_df = pd.read_sql_query(sql_q_staging, haushaltsbuch_db, parse_dates=dates_staging)
 if loaded_staging_df.empty:
-    print('All rows from staging layer are already in core')
-    print('EXIT CODE')
+    logger.info('No data in staging layer')
     sys.exit()
 
-auftraggeber_sql_query = 'select auftraggeber_id, auftraggeber from cl_auftraggeber'
-auftraggeber_df = hb.read_sql(haushaltsbuch_db, auftraggeber_sql_query)
+loaded_staging_df['already_loaded'] = 0
 
-umsatzart_sql_query = 'select umsatzart_id, umsatzart from cl_umsatzart'
-umsatzart_df = hb.read_sql(haushaltsbuch_db, umsatzart_sql_query)
+min_date = loaded_staging_df.wertstellung.min()
+max_date = loaded_staging_df.wertstellung.max()
 
-ort_sql_query = 'select ort_id, stadt from cl_ort'
-ort_df = hb.read_sql(haushaltsbuch_db, ort_sql_query)
+logger.debug('Min date from staging layer {}'.format(min_date))
+logger.debug('Max date from staging layer {}'.format(max_date))
 
-metadata = MetaData(haushaltsbuch_db, reflect=True)
-sl_DeuBa = metadata.tables['sl_DeuBa']
-'''
------------------------------------------------------------------------
- CORE: Modify rows and columns
------------------------------------------------------------------------
-'''
-print('Start modifing rows and columns')
+dates_gatekeeper = ['lock_end', 'lock_start']
+sql_q_gatekeeper = 'select lock_start, lock_end from cl_gatekeeper;'
+gatekeeper_df = pd.read_sql_query(sql_q_gatekeeper, haushaltsbuch_db, parse_dates=dates_gatekeeper)
 
-flag_auftraggeber = 0
-flag_ort = 0
-flag_umsatzart = 0
-transaktion_df = pd.DataFrame(columns=['wertstellung'\
-                                        , 'auftraggeber_id'\
-                                        , 'ort_id'\
-                                        , 'umsatzart_id'\
-                                        , 'soll'\
-                                        , 'haben'\
-                                        ])
-
-print('Start itterrows')
-for index, row in loaded_staging_df.iterrows():
-    flag_auftraggeber = 0
-    flag_ort = 0
-    flag_umsatzart = 0
-    for lkp_index, lkp_row in auftraggeber_df.iterrows():
-            if row['auftraggeber'].upper().find(lkp_row['auftraggeber'].upper()) != -1:
-                buffer_auftraggeber_id = lkp_row['auftraggeber_id']
-                flag_auftraggeber = 1
+if gatekeeper_df.empty:
+    logger.info('All rows will be loaded')
+else:
+    counter_loaded = 0
+    counter_to_load = 0
+    for index, row in loaded_staging_df.iterrows():
+        for g_index, g_row in gatekeeper_df.iterrows():
+            if g_row['lock_start'] <= row['wertstellung'] <= g_row['lock_end']:
+                logger.debug("Date in between {0} {1}: {2}".format(g_row['lock_start'], g_row['lock_end'],row['wertstellung']))
+                loaded_staging_df.set_value(index, 'already_loaded', 1)
+                counter_loaded += 1
             else:
-                del_index_auftraggeber = index
-    for lkp_index, lkp_row in ort_df.iterrows():
-        if not row['stadt']:
-            flag_ort=2
-        else:
-            if row['stadt'].upper().find(lkp_row['stadt'].upper()) != -1:
-                buffer_ort_id = lkp_row['ort_id']
-                flag_ort = 1
-            else:
-                del_index_ort = index
-    for lkp_index, lkp_row in umsatzart_df.iterrows():
-        if not row['umsatzart']:
-            flag_umsatzart=2
-        else:
-            if row['umsatzart'].upper().find(lkp_row['umsatzart'].upper()) != -1:
-                buffer_umsatzart_id = lkp_row['umsatzart_id']
-                flag_umsatzart = 1
-            else:
-                del_index_umsatzart = index
+                logger.debug("Date NOT in {0} {1}: {2}".format(g_row['lock_start'], g_row['lock_end'],row['wertstellung']))
+                counter_to_load += 1
 
-    if flag_auftraggeber == 1 \
-        and (flag_ort == 1 or flag_ort == 2)\
-        and (flag_umsatzart == 1 or flag_umsatzart ==2) :
-            to_df_auftraggeber_id = buffer_auftraggeber_id 
-            if flag_ort == 2:
-                to_df_ort_id = -1
-            else:
-                to_df_ort_id = buffer_ort_id
-            if flag_umsatzart == 2:
-                to_df_umsatzart_id = -1
-            else:
-                to_df_umsatzart_id = buffer_umsatzart_id 
-            to_df_wertstellung = row['wertstellung']
-            to_df_soll = row['soll']
-            to_df_haben = row['haben']
-            transaktion_df = transaktion_df.append(pd.Series([to_df_wertstellung\
-                                                , to_df_auftraggeber_id\
-                                                , to_df_ort_id\
-                                                , to_df_umsatzart_id\
-                                                , to_df_soll\
-                                                , to_df_haben\
-                                                ]\
-                                                , index=['wertstellung'\
-                                                ,'auftraggeber_id'\
-                                                ,'ort_id'\
-                                                ,'umsatzart_id'\
-                                                ,'soll'\
-                                                ,'haben'\
-                                                ]), ignore_index=True)
-            update_stmt = sl_DeuBa.update().where(sl_DeuBa.c.sl_id == row['sl_id']).values(new_flag=0)
-            conn = haushaltsbuch_db.connect()
-            conn.execute(update_stmt)
-    else:
-        print('#----------------------------------------------------#')
-        print('Following row could not be loaded \n and will be deleted in stage')
-        print(row['verwendungszweck'])
-        if flag_auftraggeber == 0:
-            print('Auftraggeber nicht gefunden', row['auftraggeber'])
-        elif flag_ort == 0:
-            print('Ort nicht gefunden', row['stadt'])
-        elif flag_umsatzart == 0:
-            print('Umsatzart nicht gefunden', row['umsatzart'])
-        delete_stmt = sl_DeuBa.delete().where(sl_DeuBa.c.sl_id == row['sl_id'])
-        conn = haushaltsbuch_db.connect()
-        conn.execute(delete_stmt)
-        
+    logger.info('{} rows are already in core layer'.format(counter_loaded))
+    logger.info('{} rows will be loaded'.format(counter_to_load))
 
-'''
------------------------------------------------------------------------
- CORE: Load table
------------------------------------------------------------------------
-'''
-#print(list(transaktion_df))
-#print(transaktion_df.head())
-hb.load_table(transaktion_df, 'cl_transaktion', haushaltsbuch_db, 'append')
+#-----------------------------------------------------------------------
+# Insert into lock table
+#-----------------------------------------------------------------------
+str_sql_1 = 'insert into cl_gatekeeper (lock_start, lock_end, insert_ts) VALUES '
+str_sql_2 = '(\'{0}\', \'{1}\', \'{2}\');'.format(str(min_date),str(max_date),str(datetime.datetime.now()))
+sql = text(str_sql_1 + str_sql_2)
+logger.info('Following SQL is executed: {}'.format(sql))
+result = haushaltsbuch_db.engine.execute(sql)
+
+#-----------------------------------------------------------------------
+# Load table
+#-----------------------------------------------------------------------
+logger.info('Loading core layer')
+core_df = loaded_staging_df.loc[loaded_staging_df['already_loaded'] == 0]
+core_df.pop('already_loaded')
+hb.load_table(core_df, 'cl_deuBa', haushaltsbuch_db, 'append')
+
+
 
