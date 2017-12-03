@@ -48,7 +48,7 @@ def handle_exceptions(f):
     def wrapper(*args, **kw):
         try:
             return f(*args, **kw)
-        except Exception, e:
+        except Exception as e:
             logging.critical("Function {0} failed with error {1}".format(f.__name__, e))
             #logging.debug("Function {0} failed with error {1}".format(inspect.stack(), e))
             sys.exit()
